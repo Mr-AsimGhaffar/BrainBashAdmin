@@ -1,4 +1,3 @@
-// login.ts (updated)
 import { NextApiRequest, NextApiResponse } from "next";
 import { serialize } from "cookie";
 
@@ -7,15 +6,17 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { email, password } = req.body;
+    const { username, email, password, phoneNumber } = req.body;
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/signup/`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, clientType: "web" }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, email, password, phoneNumber }),
         }
       );
 
@@ -24,12 +25,6 @@ export default async function handler(
 
         // Set HTTP-only cookies
         const cookies = [
-          serialize("id", data.data.user.id, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            maxAge: 60 * 60 * 24 * 7,
-            path: "/",
-          }),
           serialize("accessToken", data.data.token.token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -45,12 +40,15 @@ export default async function handler(
         ];
 
         res.setHeader("Set-Cookie", cookies);
-        return res.status(200).json({ message: "Successfully logged in" });
+        return res.status(200).json({ message: "Successfully signed up!" });
       }
 
-      return res.status(401).json({ message: "Invalid credentials" });
+      const errorData = await response.json();
+      return res
+        .status(response.status)
+        .json({ message: errorData.message || "Signup failed" });
     } catch (error) {
-      console.error("Error authenticating:", error);
+      console.error("Signup error:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }

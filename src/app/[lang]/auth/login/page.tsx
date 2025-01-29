@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { Form, Input, Button, Checkbox, message, Spin } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useRouter, useSearchParams } from "next/navigation";
-import Cookies from "js-cookie";
 
 export default function LoginPage({
   params: { lang },
@@ -30,13 +29,6 @@ export default function LoginPage({
       });
 
       if (response.ok) {
-        const data = await response.json();
-        const { token, refreshToken, user } = data.data;
-
-        Cookies.set("accessToken", token.token, { expires: 1 });
-        Cookies.set("refreshToken", refreshToken.token, { expires: 7 });
-        Cookies.set("id", user.id, { expires: 1 });
-
         message.success("Successfully logged in!");
         router.push(redirectUrl);
       } else {
@@ -78,7 +70,7 @@ export default function LoginPage({
           </div>
           <div className="p-4 flex items-center justify-center">
             <div className="w-full max-w-md">
-              <h1 className="text-center text-3xl font-bold text-blue-600 mb-8">
+              <h1 className="text-center text-3xl font-bold text-blue-700 mb-8">
                 Login Details
               </h1>
               <Form

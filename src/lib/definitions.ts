@@ -2,8 +2,7 @@ import { i18n } from "@/config/i18n";
 
 export type User = {
   id: string;
-  firstName: string;
-  lastName: string;
+  username: string;
   email: string;
   role: {
     name: string;
@@ -143,6 +142,29 @@ export interface StatsResponse {
       count: number;
     }[];
   };
+}
+
+import { Dayjs } from "dayjs";
+
+export interface Quiz {
+  id?: string;
+  title: string;
+  description?: string;
+  category: string;
+  maxScore: number;
+  duration: number;
+  publishDate: Dayjs;
+  expiryDate: Dayjs;
+  subjectId: number;
+  questions: Question[];
+}
+
+export interface Question {
+  id?: number;
+  question: string;
+  type: string;
+  options?: string[];
+  answer: string;
 }
 
 export type Report = {

@@ -12,7 +12,7 @@ export default async function SettingsPage() {
   return (
     <div>
       <div className="flex-1">
-        <h1 className="text-2xl font-semibold mb-6">Settings</h1>
+        <h1 className="text-2xl font-semibold mb-6">Project Settings</h1>
         <UserProvider initialUser={user}>{renderContent()}</UserProvider>
       </div>
     </div>

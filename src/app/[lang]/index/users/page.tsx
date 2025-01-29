@@ -1,16 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { Button, Table, Tag, Modal, message, Input } from "antd";
-import {
-  UserAddOutlined,
-  SearchOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import { Button, Table, Tag, Modal, message } from "antd";
+import { UserAddOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import debounce from "lodash.debounce";
-import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
-import { StatsResponse } from "@/lib/definitions";
+import { FaEdit } from "react-icons/fa";
 import UserForm from "@/components/user/UserForm";
 
 interface User {
@@ -33,33 +27,14 @@ export default function UserPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
-  const [searchFirstName, setSearchFirstName] = useState("");
-  const [searchLastName, setSearchLastName] = useState("");
-  const [searchEmail, setSearchEmail] = useState("");
-  const [searchCompanyName, setSearchCompanyName] = useState("");
-  const [searchDob, setSearchDob] = useState("");
-  const [searchContact, setSearchContact] = useState("");
-  const [searchCreatedBy, setSearchCreatedBy] = useState("");
-  const [stats, setStats] = useState<StatsResponse | null>(null);
-  const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
-    firstName: "",
-    lastName: "",
+    username: "",
     email: "",
-    "company.name": "",
     "role.name": [] as string[],
     password: "",
     confirmPassword: "",
-    dateOfBirth: "",
-    contacts: "",
     status: [] as string[],
-    createdBy: "",
     search: "",
-  });
-  const [pagination, setPagination] = useState({
-    total: 0,
-    current: 1,
-    pageSize: 10,
   });
   const [sortParams, setSortParams] = useState<
     { field: string; order: string }[]
@@ -72,43 +47,23 @@ export default function UserPage() {
     setLoading(true);
     try {
       const filtersObject = {
-        ...(currentFilters.createdBy
-          ? {
-              "createdByUser.name": currentFilters.createdBy,
-            }
-          : {}),
         ...(currentFilters.status ? { status: currentFilters.status } : {}),
-        ...(currentFilters.firstName
-          ? { firstName: currentFilters.firstName }
-          : {}),
-        ...(currentFilters.lastName
-          ? { lastName: currentFilters.lastName }
+        ...(currentFilters.username
+          ? { username: currentFilters.username }
           : {}),
         ...(currentFilters.email ? { email: currentFilters.email } : {}),
-        ...(currentFilters["company.name"]
-          ? { "company.name": currentFilters["company.name"] }
-          : {}),
-        ...(currentFilters.dateOfBirth
-          ? { dateOfBirth: currentFilters.dateOfBirth }
-          : {}),
         ...(currentFilters["role.name"]
           ? { "role.name": currentFilters["role.name"] }
-          : {}),
-        ...(currentFilters.contacts
-          ? { contacts: [currentFilters.contacts] }
           : {}),
       };
       const sort = sortParams
         .map((param) => `${param.field}:${param.order}`)
         .join(",");
       const query = new URLSearchParams({
-        page: String(pagination.current),
-        limit: String(pagination.pageSize),
         sort,
         filters: JSON.stringify(filtersObject),
         search,
-        searchFields:
-          "firstName,lastName,email,company.name,createdByUser.name",
+        searchFields: "username,email",
       }).toString();
       const response = await fetch(`/api/listUsers?${query}`, {
         method: "GET",
@@ -125,10 +80,6 @@ export default function UserPage() {
             key: item.id.toString(),
           }))
         );
-        setPagination((prev) => ({
-          ...prev,
-          total: data.meta.total,
-        }));
       } else {
         const error = await response.json();
         message.error(error.message || "Failed to fetch users");
@@ -141,64 +92,9 @@ export default function UserPage() {
     }
   };
 
-  const debouncedFetchCompanies = debounce(
-    (currentFilters) => fetchUsers(currentFilters),
-    500,
-    { leading: true, trailing: false } // Leading ensures the first call executes immediately
-  );
-
-  const handleFilterChange = (key: string, value: string) => {
-    const updatedFilters = { ...filters, [key]: value };
-    setFilters(updatedFilters);
-    setPagination((prev) => ({ ...prev, current: 1 })); // Reset to first page
-    debouncedFetchCompanies(updatedFilters);
-  };
-  const handleGeneralSearch = (
-    value: string,
-    newFilters: { role: string[]; status: string[] }
-  ) => {
-    setSearch(value);
-    setFilters((prevFilters) => {
-      const updatedFilters = { ...prevFilters };
-      if (newFilters.role.length > 0) {
-        updatedFilters["role.name"] = newFilters.role;
-      } else {
-        delete (updatedFilters as Partial<typeof updatedFilters>)["role.name"];
-      }
-      if (newFilters.status.length > 0) {
-        updatedFilters.status = newFilters.status;
-      } else {
-        delete (updatedFilters as Partial<typeof updatedFilters>).status;
-      }
-
-      return updatedFilters;
-    });
-    setPagination((prev) => ({ ...prev, current: 1 }));
-  };
-  const handleSort = (field: string) => {
-    let newSortParams = [...sortParams];
-    const existingIndex = newSortParams.findIndex(
-      (param) => param.field === field
-    );
-
-    if (existingIndex !== -1) {
-      const currentOrder = newSortParams[existingIndex].order;
-      if (currentOrder === "asc") {
-        newSortParams[existingIndex].order = "desc";
-      } else if (currentOrder === "desc") {
-        newSortParams.splice(existingIndex, 1); // Remove the field from sorting if desc
-      }
-    } else {
-      newSortParams.push({ field, order: "asc" });
-    }
-
-    setSortParams(newSortParams);
-    // fetchCompanies(filters); // Pass updated filters
-  };
-
   useEffect(() => {
     fetchUsers();
-  }, [pagination.current, pagination.pageSize, sortParams, search, filters]);
+  }, [sortParams, search, filters]);
 
   const formatString = (str: any) => {
     if (!str) return "";
@@ -213,421 +109,32 @@ export default function UserPage() {
 
   const columns: ColumnsType<User> = [
     {
-      title: (
-        <span className="flex items-center gap-2">
-          First Name
-          {sortParams.find((param) => param.field === "firstName") ? (
-            sortParams.find((param) => param.field === "firstName")!.order ===
-            "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("firstName")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("firstName")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("firstName")}
-            />
-          )}
-        </span>
-      ),
-      dataIndex: "firstName",
-      key: "firstName",
+      title: <span className="flex items-center gap-2">Username</span>,
+      dataIndex: "username",
+      key: "username",
       className: "font-workSans",
       render: (text) => <p>{formatString(text)}</p>,
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search First Name"
-            value={searchFirstName}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchFirstName ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const newSearchValue = "firstName";
-              setSearchFirstName(e.target.value);
-              if (!searchRef.current.includes(newSearchValue)) {
-                searchRef.current.push(newSearchValue);
-              }
-              handleFilterChange("firstName", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("firstName", searchFirstName)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchFirstName(""); // Reset the search field
-                handleFilterChange("firstName", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchFirstName ? "blue" : "gray" }} />
-      ),
     },
     {
-      title: (
-        <span className="flex items-center gap-2">
-          last Name
-          {sortParams.find((param) => param.field === "lastName") ? (
-            sortParams.find((param) => param.field === "lastName")!.order ===
-            "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("lastName")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("lastName")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("lastName")}
-            />
-          )}
-        </span>
-      ),
-      dataIndex: "lastName",
-      key: "lastName",
-      className: "font-workSans",
-      render: (text) => <p>{formatString(text)}</p>,
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Last Name"
-            value={searchLastName}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchLastName ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const newSearchValue = "lastName";
-              setSearchLastName(e.target.value);
-              if (!searchRef.current.includes(newSearchValue)) {
-                searchRef.current.push(newSearchValue);
-              }
-              handleFilterChange("lastName", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("lastName", searchLastName)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchLastName(""); // Reset the search field
-                handleFilterChange("lastName", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchLastName ? "blue" : "gray" }} />
-      ),
-    },
-    {
-      title: (
-        <span className="flex items-center gap-2">
-          Email
-          {sortParams.find((param) => param.field === "email") ? (
-            sortParams.find((param) => param.field === "email")!.order ===
-            "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("email")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("email")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("email")}
-            />
-          )}
-        </span>
-      ),
+      title: <span className="flex items-center gap-2">Email</span>,
       dataIndex: "email",
       key: "email",
       className: "font-workSans",
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Email"
-            value={searchEmail}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchEmail ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "email";
-              setSearchEmail(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("email", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("email", searchEmail)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchEmail(""); // Reset the search field
-                handleFilterChange("email", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchEmail ? "blue" : "gray" }} />
-      ),
     },
     {
-      title: (
-        <span className="flex items-center gap-2">
-          Company Name
-          {sortParams.find((param) => param.field === "company.name") ? (
-            sortParams.find((param) => param.field === "company.name")!
-              .order === "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("company.name")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("company.name")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("company.name")}
-            />
-          )}
-        </span>
-      ),
-      dataIndex: "company",
-      key: "company",
-      className: "font-workSans",
-      render: (company) => {
-        if (company && company) {
-          const { name } = company;
-          return <p>{name}</p>;
-        }
-        return <p>Company not available</p>;
-      },
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Company Name"
-            value={searchCompanyName}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchCompanyName ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const newSearchValue = "company";
-              setSearchCompanyName(e.target.value);
-              if (!searchRef.current.includes(newSearchValue)) {
-                searchRef.current.push(newSearchValue);
-              }
-              handleFilterChange("company.name", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() =>
-                handleFilterChange("company.name", searchCompanyName)
-              }
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchCompanyName(""); // Reset the search field
-                handleFilterChange("company.name", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined
-          style={{ color: searchCompanyName ? "blue" : "gray" }}
-        />
-      ),
-    },
-    {
-      title: (
-        <span className="flex items-center gap-2">
-          Role
-          {sortParams.find((param) => param.field === "role.name") ? (
-            sortParams.find((param) => param.field === "role.name")!.order ===
-            "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("role.name")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("role.name")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("role.name")}
-            />
-          )}
-        </span>
-      ),
+      title: <span className="flex items-center gap-2">Role</span>,
       dataIndex: "role",
       key: "role",
       className: "font-workSans",
       render: (role) => {
         if (role) {
-          const { name } = role;
-          return <p>{formatString(name)}</p>;
+          return <p>{formatString(role)}</p>;
         }
         return null;
       },
     },
     {
-      title: "Date of Birth",
-      dataIndex: "dateOfBirth",
-      key: "dateOfBirth",
-      className: "font-workSans",
-      render: (text: string) => {
-        if (!text) {
-          return "No Birthday Found";
-        }
-        const date = new Date(text);
-        return text ? date.toLocaleDateString("en-GB") : "";
-      },
-      // filterDropdown: (
-      //   <div style={{ padding: 8 }}>
-      //     <Input
-      //       placeholder="Search date of bIrth"
-      //       value={searchDob}
-      //       suffix={
-      //         <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
-      //       }
-      //       onChange={(e) => {
-      //         const newSearchValue = "dateOfBirth";
-      //         setSearchDob(e.target.value);
-      //         if (!searchRef.current.includes(newSearchValue)) {
-      //           searchRef.current.push(newSearchValue);
-      //         }
-      //         handleFilterChange("dateOfBirth", e.target.value);
-      //       }}
-      //     />
-      //     <div style={{ marginTop: 8 }}>
-      //       <Button
-      //         type="primary"
-      //         icon={<SearchOutlined />}
-      //         onClick={() => handleFilterChange("dateOfBirth", searchDob)}
-      //         style={{ marginRight: 8 }}
-      //       >
-      //         Search
-      //       </Button>
-      //       <Button
-      //         icon={<ReloadOutlined />}
-      //         onClick={() => {
-      //           setSearchDob(""); // Reset the search field
-      //           handleFilterChange("dateOfBirth", ""); // Reset filter
-      //         }}
-      //       >
-      //         Reset
-      //       </Button>
-      //     </div>
-      //   </div>
-      // ),
-      // filterIcon: () => (
-      //   <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
-      // ),
-    },
-    {
-      title: (
-        <span className="flex items-center gap-2">
-          Status
-          {sortParams.find((param) => param.field === "status") ? (
-            sortParams.find((param) => param.field === "status")!.order ===
-            "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("status")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("status")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("status")}
-            />
-          )}
-        </span>
-      ),
+      title: <span className="flex items-center gap-2">Status</span>,
       dataIndex: "status",
       key: "status",
       className: "font-workSans",
@@ -644,142 +151,6 @@ export default function UserPage() {
         );
       },
     },
-    {
-      title: "Contact",
-      dataIndex: "contacts",
-      key: "contacts",
-      className: "font-workSans",
-      // filterDropdown: (
-      //   <div style={{ padding: 8 }}>
-      //     <Input
-      //       placeholder="Search contact"
-      //       value={searchContact}
-      //       suffix={
-      //         <SearchOutlined
-      //           style={{ color: searchContact ? "blue" : "gray" }}
-      //         />
-      //       }
-      //       onChange={(e) => {
-      //         const searchValue = "contacts";
-      //         setSearchContact(e.target.value);
-      //         if (!searchRef.current.includes(searchValue)) {
-      //           searchRef.current.push(searchValue);
-      //         }
-      //         handleFilterChange("contacts", e.target.value);
-      //       }}
-      //     />
-      //     <div style={{ marginTop: 8 }}>
-      //       <Button
-      //         type="primary"
-      //         icon={<SearchOutlined />}
-      //         onClick={() => handleFilterChange("contacts", searchContact)}
-      //         style={{ marginRight: 8 }}
-      //       >
-      //         Search
-      //       </Button>
-      //       <Button
-      //         icon={<ReloadOutlined />}
-      //         onClick={() => {
-      //           setSearchContact(""); // Reset the search field
-      //           handleFilterChange("contacts", ""); // Reset filter
-      //         }}
-      //       >
-      //         Reset
-      //       </Button>
-      //     </div>
-      //   </div>
-      // ),
-      // filterIcon: () => (
-      //   <SearchOutlined style={{ color: searchContact ? "blue" : "gray" }} />
-      // ),
-    },
-    {
-      title: (
-        <span className="flex items-center gap-2">
-          Created By
-          {sortParams.find((param) => param.field === "createdByUser.name") ? (
-            sortParams.find((param) => param.field === "createdByUser.name")!
-              .order === "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("createdByUser.name")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("createdByUser.name")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("createdByUser.name")}
-            />
-          )}
-        </span>
-      ),
-      dataIndex: "createdByUser",
-      key: "createdBy",
-      className: "font-workSans",
-      render: (createdByUser) => {
-        if (createdByUser) {
-          const { firstName, lastName } = createdByUser;
-          return <p>{formatString(firstName + " " + lastName)}</p>;
-        }
-        return <p>No Admin Found</p>;
-      },
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Created By"
-            value={searchCreatedBy}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchCreatedBy ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "createdByUser";
-              setSearchCreatedBy(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("createdBy", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("createdBy", searchCreatedBy)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchCreatedBy(""); // Reset the search field
-                handleFilterChange("createdBy", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchCreatedBy ? "blue" : "gray" }} />
-      ),
-    },
-    // {
-    //   title: "Profile Picture",
-    //   dataIndex: "companyLogo",
-    //   key: "companyLogo",
-    //   render: (logo: string) => (
-    //     <img src={logo} alt="Company Logo" style={{ objectFit: "cover" }} />
-    //   ),
-    // },
     {
       title: "Action",
       key: "action",
@@ -884,57 +255,12 @@ export default function UserPage() {
     setIsModalOpen(false);
   };
 
-  const handlePaginationChange = (page: number, pageSize: number) => {
-    setPagination({ current: page, pageSize, total: pagination.total });
-  };
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch("/api/dashboard/getStats", {
-          method: "GET",
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
-        } else {
-          const errorData = await response.json();
-          message.error(errorData.message || "Failed to fetch stats.");
-        }
-      } catch (error) {
-        message.error("An error occurred while fetching stats.");
-        console.error("Fetch stats error:", error);
-      }
-    };
-    fetchStats();
-  }, []);
-
-  const thisMonthCount = stats?.data?.thisMonth.users || 0;
-
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold font-montserrat">Users</h1>
+        <h1 className="text-3xl font-bold font-montserrat">Manage Users</h1>
       </div>
-      <div className="flex items-center gap-4 mb-2 font-workSans text-sm">
-        <div className="flex items-center gap-1">
-          <div className="font-medium text-teal-800">All</div>
-          <div className="text-gray-700">({pagination.total})</div>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="text-teal-800 font-medium">New</div>
-          <div className="text-gray-700">({thisMonthCount})</div>
-        </div>
-        {/* <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Inactive</div>
-          <div className="text-gray-700 hover:underline">(8)</div>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Active</div>
-          <div className="text-gray-700 hover:underline">(12)</div>
-        </div> */}
-      </div>
-      <div className="flex justify-between items-center  mb-4">
+      {/* <div className="flex justify-between items-center  mb-4">
         <div className="flex items-center gap-4">
           <Button
             type="primary"
@@ -946,23 +272,13 @@ export default function UserPage() {
             Add User
           </Button>
         </div>
-      </div>
+      </div> */}
 
       <Table
         columns={columns}
         dataSource={users}
         loading={loading}
         scroll={{ x: "max-content" }}
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total: pagination.total,
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50", "100"],
-          onChange: handlePaginationChange,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-        }}
       />
 
       <Modal

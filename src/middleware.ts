@@ -23,12 +23,12 @@ export function middleware(request: NextRequest) {
   const isRootPath = pathname === "/";
   const locale = getLocale(request);
 
-  // Check if there is any supported locale in the pathname
+  // Check if pathname is missing locale
   const pathnameIsMissingLocale = i18n.locales.every(
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
   );
 
-  // Redirect if there is no locale
+  // Redirect if locale is missing
   if (pathnameIsMissingLocale) {
     const sanitizedPathname = pathname.startsWith("/")
       ? pathname.substring(1)
@@ -40,6 +40,29 @@ export function middleware(request: NextRequest) {
 
   if (isRootPath) {
     return NextResponse.redirect(new URL(`/${locale}/auth/login`, request.url));
+  }
+
+  // Authentication checks
+  const pathParts = pathname.split("/");
+  const localePart = pathParts[1];
+  const routeSegment = pathParts[2];
+
+  const isProtectedRoute = routeSegment === "index";
+  const isAuthRoute = routeSegment === "auth";
+  const hasValidToken = request.cookies.has("accessToken");
+
+  // Handle protected routes
+  if (isProtectedRoute && !hasValidToken) {
+    const loginUrl = new URL(`/${localePart}/auth/login`, request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Prevent authenticated users from accessing auth routes
+  if (isAuthRoute && hasValidToken) {
+    return NextResponse.redirect(
+      new URL(`/${localePart}/index/home`, request.url)
+    );
   }
 
   return NextResponse.next({ headers });

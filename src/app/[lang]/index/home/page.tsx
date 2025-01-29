@@ -6,17 +6,12 @@ import QuizzezParticipationChart from "@/components/dashboard/QuizzezParticipati
 const HomePage = () => {
   return (
     <main className="mx-auto space-y-6">
-      <div>
-        <DashboardCard />
+      hello
+      <div>{/* <DashboardCard /> */}</div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div>{/* <UserGrowthChart /> */}</div>
+        <div>{/* <QuizzezParticipationChart /> */}</div>
       </div>
-      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div>
-          <UserGrowthChart />
-        </div>
-        <div>
-          <QuizzezParticipationChart />
-        </div>
-      </div> */}
     </main>
   );
 };

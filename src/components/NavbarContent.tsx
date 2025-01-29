@@ -8,9 +8,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import { Locale } from "@/lib/definitions";
-import { Spin } from "antd";
 import { useUser } from "@/hooks/context/AuthContext";
-import NotificationList from "./NotificationList";
 
 interface Props {
   locale: Locale;
@@ -97,7 +95,7 @@ export default function NavbarContent({ locale, messages }: Props) {
           <Link href={`/${locale}/index/home`}>
             <div className="flex items-center justify-start">
               <img
-                src="/images/ueberProLogo.png"
+                src="/images/brain-bash-logo.png"
                 alt="Ueber Pro Logo"
                 width={70}
                 height={70}
@@ -177,14 +175,10 @@ export default function NavbarContent({ locale, messages }: Props) {
                 <Menu ref={userMenuRef}>
                   <MenuItem href="">
                     <p className="font-semibold text-gray-800">
-                      {user?.firstName
-                        ? user.firstName.charAt(0).toUpperCase() +
-                          user.firstName.slice(1)
-                        : "Guest"}{" "}
-                      {user?.lastName
-                        ? user.lastName.charAt(0).toUpperCase() +
-                          user.lastName.slice(1)
-                        : ""}
+                      {user?.username
+                        ? user.username.charAt(0).toUpperCase() +
+                          user.username.slice(1)
+                        : "Guest"}
                     </p>
                   </MenuItem>
 

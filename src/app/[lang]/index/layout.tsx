@@ -6,12 +6,10 @@ import { getActivities, getUser } from "@/lib/data";
 import { Locale } from "@/lib/definitions";
 import { UserProvider } from "@/hooks/context/AuthContext";
 import { ActivityProvider } from "@/hooks/context/ActivityContext";
-import { i18n } from "../../../../i18n-config";
 import { headers } from "next/headers";
 import { Inter, Work_Sans, Montserrat } from "next/font/google";
 
 import "@/app/globals.css";
-import Script from "next/script";
 import { NotificationProvider } from "@/hooks/context/NotificationContext";
 
 export const metadata = {
@@ -42,8 +40,6 @@ interface Props {
 
 export default async function Root({ params, children }: Props) {
   const headerList = headers();
-  const role = headerList.get("role") || null;
-
   const pathname: string = headerList.get("x-current-path") || "";
   const user = await getUser();
   const activity = await getActivities();
@@ -56,12 +52,6 @@ export default async function Root({ params, children }: Props) {
       lang={params.lang}
       className={`${inter.variable} ${workSans.variable} ${montserrat.variable}`}
     >
-      <head>
-        <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
-          strategy="beforeInteractive"
-        />
-      </head>
       <body className="relative mt-16">
         <ConfigProvider
           theme={{
@@ -85,7 +75,3 @@ export default async function Root({ params, children }: Props) {
     </html>
   );
 }
-
-// export async function generateStaticParams() {
-//   return i18n.locales.map((locale) => ({ lang: locale }));
-// }

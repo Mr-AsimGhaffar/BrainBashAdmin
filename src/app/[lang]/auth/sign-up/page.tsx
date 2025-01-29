@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Form, Input, Button, message, Spin } from "antd";
+import { Form, Input, Button, message, Spin, Select } from "antd";
 import { LockOutlined } from "@ant-design/icons";
 import { useRouter, useSearchParams } from "next/navigation";
-import Cookies from "js-cookie";
+import PhoneInput from "react-phone-number-input";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 export default function SignUpPage({
   params: { lang },
@@ -14,40 +15,33 @@ export default function SignUpPage({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams?.get("redirect") || `/${lang}/index/home`;
+  const redirectUrl = searchParams?.get("redirect") || `/${lang}/auth/login`;
   const [loadingLogin, setLoadingLogin] = useState(false);
+  const [phoneValue, setPhoneValue] = useState<string>();
 
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/auth/login`, {
+      const response = await fetch(`/api/auth/signUp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          ...values,
+          phoneNumber: phoneValue,
+        }),
       });
 
       if (response.ok) {
-        const data = await response.json();
-        const { token, refreshToken, user } = data.data;
-
-        Cookies.set("accessToken", token.token, { expires: 1 });
-        Cookies.set("refreshToken", refreshToken.token, { expires: 7 });
-        Cookies.set("id", user.id, { expires: 1 });
-
-        message.success("Successfully logged in!");
-        const redirectTo =
-          user.role.name === "CUSTOMER"
-            ? `/${lang}/index/listings`
-            : redirectUrl;
-        router.push(redirectTo);
+        message.success("Successfully signed up!");
+        router.push(redirectUrl);
       } else {
         const data = await response.json();
-        message.error(data.message || "Invalid credentials");
+        message.error(data.message || "Signup failed");
       }
     } catch (error) {
-      message.error("An error occurred during login");
+      message.error("An error occurred during signup");
     } finally {
       setLoading(false);
     }
@@ -55,11 +49,10 @@ export default function SignUpPage({
 
   const handleLoginClick = async () => {
     setLoadingLogin(true);
-    // Simulate a delay or API request for "forgot password" logic
     setTimeout(() => {
-      setLoadingLogin(false); // Stop loading after the request
+      setLoadingLogin(false);
       router.push(`/${lang}/auth/login`);
-    }, 2000); // Simulate a delay of 2 seconds for the request
+    }, 2000);
   };
 
   return (
@@ -76,7 +69,7 @@ export default function SignUpPage({
           <div className="p-4 flex items-center justify-center">
             <div className="w-full max-w-md">
               <div className="mb-8 text-center">
-                <h1 className="text-3xl font-bold text-blue-600">
+                <h1 className="text-3xl font-bold text-blue-700">
                   Create an account
                 </h1>
                 <p className="text-lg text-blue-600 mb-8">
@@ -84,8 +77,8 @@ export default function SignUpPage({
                 </p>
               </div>
               <Form
-                name="login"
-                initialValues={{ remember: true }}
+                name="signup"
+                initialValues={{ countryCode: "+1" }}
                 onFinish={onFinish}
                 layout="vertical"
                 size="large"
@@ -123,13 +116,36 @@ export default function SignUpPage({
                       required: true,
                       message: "Please enter your phone number",
                     },
+                    () => ({
+                      validator(_, value) {
+                        if (!phoneValue || !isValidPhoneNumber(phoneValue)) {
+                          return Promise.reject(
+                            new Error("Invalid phone number format")
+                          );
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
                   ]}
                 >
-                  <Input
-                    placeholder="Phone Number"
-                    className="h-12 border-blue-500"
+                  <PhoneInput
+                    international
+                    defaultCountry="US"
+                    value={phoneValue}
+                    onChange={setPhoneValue}
+                    className="border border-blue-500 text-blue-500 rounded-md pl-2 flex items-center gap-4 h-12"
+                    flagComponent={({ country }) => (
+                      <div></div>
+                      // <img
+                      //   src={`https://flagcdn.com/w20/${country.toLowerCase()}.png`}
+                      //   alt={country}
+                      //   className="w-5 h-4 object-cover ml-2"
+                      //   loading="lazy"
+                      // />
+                    )}
                   />
                 </Form.Item>
+
                 <Form.Item
                   name="password"
                   rules={[
