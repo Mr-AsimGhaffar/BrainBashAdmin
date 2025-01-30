@@ -78,6 +78,7 @@ export default function NavbarContent({ locale, messages }: Props) {
   const navLinks = [
     { href: `/${locale}/index/users`, label: "Manage Users" },
     { href: `/${locale}/index/manageQuizzes`, label: "Manage Quizzes" },
+    { href: `/${locale}/index/subjects`, label: "Subjects" },
     { href: `/${locale}/index/reports`, label: "Reports" },
     { href: `/${locale}/index/settings`, label: "Settings" },
     { href: `/${locale}/index/accessLogs`, label: "Access Logs" },

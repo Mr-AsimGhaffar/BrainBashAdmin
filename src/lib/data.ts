@@ -1,4 +1,4 @@
-import { User, Report, TeamMember, Activity } from "@/lib/definitions";
+import { User, Report, TeamMember } from "@/lib/definitions";
 import { fetchWithAuth } from "@/pages/api/refreshToken/refreshAccessToken";
 import { cookies } from "next/headers";
 
@@ -32,40 +32,6 @@ export async function getUser(): Promise<User | null> {
   } catch (error) {
     console.error("Error fetching user data:", error);
     throw error;
-  }
-}
-
-export async function getActivities(): Promise<Activity | null> {
-  try {
-    const id = cookies().get("id")?.value;
-    const accessToken = cookies().get("accessToken")?.value;
-    const refreshToken = cookies().get("refreshToken")?.value;
-
-    if (!id || !accessToken || !refreshToken) {
-      return null;
-    }
-
-    // Decode the JWT token to check the user's role
-    const decodedToken: any = JSON.parse(atob(accessToken.split(".")[1]));
-    if (decodedToken.role === "CUSTOMER") {
-      return null;
-    }
-
-    const response = await fetchWithAuth(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/activities/`,
-      { method: "GET" },
-      { accessToken, refreshToken }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch activities data");
-    }
-
-    const activity = await response.json();
-    return activity.data;
-  } catch (error) {
-    console.error("Error fetching activities:", error);
-    return null;
   }
 }
 

@@ -2,10 +2,9 @@ import { ConfigProvider } from "antd";
 import Navbar from "@/components/Navbar";
 import Content from "@/components/Content";
 
-import { getActivities, getUser } from "@/lib/data";
+import { getUser } from "@/lib/data";
 import { Locale } from "@/lib/definitions";
 import { UserProvider } from "@/hooks/context/AuthContext";
-import { ActivityProvider } from "@/hooks/context/ActivityContext";
 import { headers } from "next/headers";
 import { Inter, Work_Sans, Montserrat } from "next/font/google";
 
@@ -42,7 +41,6 @@ export default async function Root({ params, children }: Props) {
   const headerList = headers();
   const pathname: string = headerList.get("x-current-path") || "";
   const user = await getUser();
-  const activity = await getActivities();
   const isAuthPage =
     params.lang &&
     ["login", "register"].some((route) => pathname.includes(route));
@@ -60,14 +58,12 @@ export default async function Root({ params, children }: Props) {
         >
           <UserProvider initialUser={user}>
             <NotificationProvider>
-              <ActivityProvider initialActivity={activity}>
-                {!isAuthPage && (
-                  <>
-                    <Navbar locale={params.lang} />
-                  </>
-                )}
-                {isAuthPage ? children : <Content>{children}</Content>}
-              </ActivityProvider>
+              {!isAuthPage && (
+                <>
+                  <Navbar locale={params.lang} />
+                </>
+              )}
+              {isAuthPage ? children : <Content>{children}</Content>}
             </NotificationProvider>
           </UserProvider>
         </ConfigProvider>

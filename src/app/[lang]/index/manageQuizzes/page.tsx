@@ -233,11 +233,12 @@ const ManageQuizzes = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Manage Quizzes</h1>
+        <h1 className="text-3xl font-bold font-montserra">Manage Quizzes</h1>
         <Button
           type="primary"
+          size="large"
           icon={<PlusOutlined />}
           onClick={() => {
             setSelectedQuiz(null);

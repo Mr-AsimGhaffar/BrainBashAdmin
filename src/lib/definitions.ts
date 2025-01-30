@@ -17,34 +17,6 @@ export type User = {
   };
 };
 
-export type Activity = {
-  id: number;
-  createdAt: string;
-  action: string;
-  table: string;
-  endpoint: string;
-  payload: {
-    cost: string;
-    carId: number;
-    tripId: number;
-    pickupLat: number;
-    waypoints: any[];
-    dropoffLat: number;
-    pickupLong: number;
-    dropoffLong: number;
-    endLocation: string;
-    startLocation: string;
-  };
-  resourceId: number;
-  deletedAt: string | null;
-  userId: number;
-  User: {
-    firstName: string;
-    lastName: string;
-    id: number;
-  };
-};
-
 export interface StatsResponse {
   message: string;
   data: {
@@ -165,6 +137,57 @@ export interface Question {
   type: string;
   options?: string[];
   answer: string;
+}
+
+export interface Subject {
+  key: string;
+  id: number;
+  name: string;
+}
+
+export interface AccessLogUser {
+  id: number;
+  username: string;
+  email: string;
+}
+
+export interface UserActionResponse {
+  id: number;
+  userId?: number;
+  action: string;
+  userAgent: string;
+  createdAt: string;
+  updatedAt: string;
+  user: AccessLogUser;
+}
+
+export interface UserActivity {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  status: string;
+}
+export interface ActivityActionResponse {
+  id: number;
+  userId: number;
+  action: string;
+  createdAt: string;
+  user: UserActivity;
+}
+
+export interface UserFeedback {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  status: string;
+}
+export interface FeedbackActionResponse {
+  id: number;
+  userId: number;
+  status: string;
+  user: UserFeedback;
 }
 
 export type Report = {
