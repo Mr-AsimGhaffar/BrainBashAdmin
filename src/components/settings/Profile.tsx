@@ -2,13 +2,13 @@
 
 import React from "react";
 import { Form, Input, Button, Card, message } from "antd";
-import { useUser } from "@/hooks/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useSettings } from "@/hooks/context/ProjectSettingContext";
 
 export default function Profile() {
   const router = useRouter();
   const [form] = Form.useForm();
-  const { user, setUser } = useUser();
+  const { settings, setSettings } = useSettings();
 
   const backToDashboard = () => {
     router.push(`/index/home`);
@@ -16,13 +16,12 @@ export default function Profile() {
 
   const onFinish = async (values: any) => {
     try {
-      const response = await fetch("/api/updateUsers", {
+      const response = await fetch("/api/settings/updateSettings", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: user?.id,
           ...values,
         }),
       });
@@ -31,14 +30,15 @@ export default function Profile() {
         const result = await response.json();
         message.success(result.message);
         form.setFieldsValue(result.data);
-        setUser(result.data);
+        setSettings(result.data);
+        window.location.reload();
       } else {
         const error = await response.json();
-        message.error(error.message || "Failed to update user");
+        message.error(error.message || "Failed to update settings");
       }
     } catch (error) {
-      console.error("Error updating user:", error);
-      message.error("An error occurred while updating the user");
+      console.error("Error updating settings:", error);
+      message.error("An error occurred while updating the settings");
     }
   };
   return (
@@ -48,12 +48,12 @@ export default function Profile() {
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          initialValues={user || {}}
+          initialValues={settings || {}}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Form.Item
               label="Project Title"
-              name="projectTitle"
+              name="title"
               required
               rules={[
                 { required: true, message: "Please input your project title" },

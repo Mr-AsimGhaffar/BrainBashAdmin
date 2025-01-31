@@ -2,7 +2,7 @@ import { ConfigProvider } from "antd";
 import Navbar from "@/components/Navbar";
 import Content from "@/components/Content";
 
-import { getUser } from "@/lib/data";
+import { getProjectSettings, getUser } from "@/lib/data";
 import { Locale } from "@/lib/definitions";
 import { UserProvider } from "@/hooks/context/AuthContext";
 import { headers } from "next/headers";
@@ -10,10 +10,13 @@ import { Inter, Work_Sans, Montserrat } from "next/font/google";
 
 import "@/app/globals.css";
 import { NotificationProvider } from "@/hooks/context/NotificationContext";
+import { SettingsProvider } from "@/hooks/context/ProjectSettingContext";
 
 export const metadata = {
-  title: "Next.js i18n Dashboard Template",
-  description: "How to create internationalized dasboard with Next.js",
+  title: "BrainBash Admin",
+  icons: {
+    icon: "/images/brain-bash-logo.png",
+  },
 };
 
 const inter = Inter({
@@ -41,6 +44,7 @@ export default async function Root({ params, children }: Props) {
   const headerList = headers();
   const pathname: string = headerList.get("x-current-path") || "";
   const user = await getUser();
+  const projectSettings = await getProjectSettings();
   const isAuthPage =
     params.lang &&
     ["login", "register"].some((route) => pathname.includes(route));
@@ -57,14 +61,16 @@ export default async function Root({ params, children }: Props) {
           }}
         >
           <UserProvider initialUser={user}>
-            <NotificationProvider>
-              {!isAuthPage && (
-                <>
-                  <Navbar locale={params.lang} />
-                </>
-              )}
-              {isAuthPage ? children : <Content>{children}</Content>}
-            </NotificationProvider>
+            <SettingsProvider initialSettings={projectSettings}>
+              <NotificationProvider>
+                {!isAuthPage && (
+                  <>
+                    <Navbar locale={params.lang} />
+                  </>
+                )}
+                {isAuthPage ? children : <Content>{children}</Content>}
+              </NotificationProvider>
+            </SettingsProvider>
           </UserProvider>
         </ConfigProvider>
       </body>

@@ -1,10 +1,10 @@
 import React from "react";
 import Profile from "@/components/settings/Profile";
-import { UserProvider } from "@/hooks/context/AuthContext";
-import { getUser } from "@/lib/data";
+import { getProjectSettings } from "@/lib/data";
+import { SettingsProvider } from "@/hooks/context/ProjectSettingContext";
 
 export default async function SettingsPage() {
-  const user = await getUser();
+  const projectSettings = await getProjectSettings();
   const renderContent = () => {
     return <Profile />;
   };
@@ -13,7 +13,9 @@ export default async function SettingsPage() {
     <div>
       <div className="flex-1">
         <h1 className="text-2xl font-semibold mb-6">Project Settings</h1>
-        <UserProvider initialUser={user}>{renderContent()}</UserProvider>
+        <SettingsProvider initialSettings={projectSettings}>
+          {renderContent()}
+        </SettingsProvider>
       </div>
     </div>
   );

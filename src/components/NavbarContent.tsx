@@ -5,10 +5,11 @@ import { IntlProvider, FormattedMessage } from "react-intl";
 import clsx from "clsx";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import { Locale } from "@/lib/definitions";
 import { useUser } from "@/hooks/context/AuthContext";
+import { useSettings } from "@/hooks/context/ProjectSettingContext";
 
 interface Props {
   locale: Locale;
@@ -17,7 +18,9 @@ interface Props {
 
 export default function NavbarContent({ locale, messages }: Props) {
   const { user } = useUser();
+  const { settings } = useSettings();
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [percent, setPercent] = useState(0);
 
@@ -79,14 +82,17 @@ export default function NavbarContent({ locale, messages }: Props) {
     { href: `/${locale}/index/users`, label: "Manage Users" },
     { href: `/${locale}/index/manageQuizzes`, label: "Manage Quizzes" },
     { href: `/${locale}/index/subjects`, label: "Subjects" },
-    { href: `/${locale}/index/reports`, label: "Reports" },
+    // { href: `/${locale}/index/reports`, label: "Reports" },
     { href: `/${locale}/index/settings`, label: "Settings" },
     { href: `/${locale}/index/accessLogs`, label: "Access Logs" },
-    { href: `/${locale}/index/activities`, label: "User Activities" },
+    // { href: `/${locale}/index/activities`, label: "User Activities" },
     { href: `/${locale}/index/manageFeedback`, label: "Manage Feedback" },
-    { href: `/${locale}/index/notifications`, label: "Notifications" },
-    { href: `/${locale}/index/achievements`, label: "Achievements" },
-    { href: `/${locale}/index/manageWidgets`, label: "Manage Widgets" },
+    // { href: `/${locale}/index/notifications`, label: "Notifications" },
+    // { href: `/${locale}/index/achievements`, label: "Achievements" },
+    // { href: `/${locale}/index/manageWidgets`, label: "Manage Widgets" },
+    { href: `/${locale}/index/quizHome`, label: "Quiz Home" },
+    { href: `/${locale}/index/createQuiz`, label: "Create Quiz" },
+    { href: `/${locale}/index/quizzesList`, label: "Quizzes List" },
   ];
 
   return (
@@ -101,8 +107,8 @@ export default function NavbarContent({ locale, messages }: Props) {
                 width={70}
                 height={70}
               />
-              <span className="font-workSans text-xl tracking-wide text-black font-semibold opacity-80">
-                BrainBash Admin
+              <span className="font-sansInter text-xl tracking-wide text-black font-semibold opacity-80">
+                {settings?.title}
               </span>
             </div>
           </Link>
@@ -113,16 +119,24 @@ export default function NavbarContent({ locale, messages }: Props) {
             )}
             ref={appMenuRef}
           >
-            <div className="lg:flex lg:flex-row lg:mt-0 lg:border-0 lg:shadow-none lg:bg-transparent flex flex-col mt-2 border-t border-gray-200 shadow-lg bg-white">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
-                >
-                  {link.label}
-                </Link>
-              ))}
+            <div className="lg:flex lg:flex-row lg:mt-0 lg:border-0 lg:shadow-none lg:bg-transparent flex flex-col mt-2 border-t border-gray-200 shadow-lg bg-white font-semibold font-sansInter">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 hover:rounded-md hover:text-white hover:font-semibold ${
+                      isActive
+                        ? "bg-blue-500 font-semibold text-white rounded-md font-sansInter"
+                        : ""
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -202,23 +216,32 @@ export default function NavbarContent({ locale, messages }: Props) {
         <div
           ref={appMenuRef}
           className={clsx(
-            "lg:hidden overflow-hidden transition-all duration-300 ease-in-out",
+            "lg:hidden overflow-auto transition-all duration-300 ease-in-out",
             {
               "max-h-0": !isMobileMenuOpen,
-              "max-h-96": isMobileMenuOpen, // Adjust height as needed
+              "max-h-96": isMobileMenuOpen,
             }
           )}
         >
           <div className="flex flex-col mt-2 border-t border-gray-200 shadow-lg bg-white">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={clsx(
+                    "px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200 hover:bg-blue-500 hover:rounded-md hover:text-white",
+                    {
+                      "bg-blue-500 text-white rounded-md": isActive,
+                    }
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </nav>

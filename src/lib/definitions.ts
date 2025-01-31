@@ -17,6 +17,12 @@ export type User = {
   };
 };
 
+export interface ProjectSettings {
+  id: number;
+  title: string;
+  email: string;
+}
+
 export interface StatsResponse {
   message: string;
   data: {
@@ -188,6 +194,11 @@ export interface FeedbackActionResponse {
   userId: number;
   status: string;
   user: UserFeedback;
+}
+
+export interface QuizSession {
+  quizId: number;
+  userId: number;
 }
 
 export type Report = {
