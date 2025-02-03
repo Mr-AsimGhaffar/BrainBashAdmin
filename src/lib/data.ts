@@ -1,4 +1,10 @@
-import { User, Report, TeamMember, ProjectSettings } from "@/lib/definitions";
+import {
+  User,
+  Report,
+  TeamMember,
+  ProjectSettings,
+  QuizSessionResponse,
+} from "@/lib/definitions";
 import { fetchWithAuth } from "@/pages/api/refreshToken/refreshAccessToken";
 import { cookies } from "next/headers";
 

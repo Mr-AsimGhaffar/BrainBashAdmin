@@ -5,6 +5,7 @@ import { Button, Space, Table, Tag, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { FeedbackActionResponse } from "@/lib/definitions";
 import dayjs from "dayjs";
+import FormatString from "@/utils/FormatString";
 
 export default function AccessLogsPage() {
   const [feedback, setFeedback] = useState<FeedbackActionResponse[]>([]);
@@ -101,17 +102,6 @@ export default function AccessLogsPage() {
     }
   };
 
-  const formatString = (str: any) => {
-    if (!str) return "";
-    return str
-      .split("_")
-      .map(
-        (word: any) =>
-          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-      )
-      .join(" ");
-  };
-
   const columns: ColumnsType<FeedbackActionResponse> = [
     {
       title: <span className="flex items-center gap-2">ID</span>,
@@ -144,7 +134,7 @@ export default function AccessLogsPage() {
         };
         return (
           <Tag color={statusColors[status] || "default"}>
-            {formatString(status)}
+            {FormatString(status)}
           </Tag>
         );
       },

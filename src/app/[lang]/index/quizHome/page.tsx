@@ -1,39 +1,29 @@
 "use client";
+import QuizCard from "@/components/quiz/QuizCard";
 import { Carousel } from "antd";
 import { CarouselRef } from "antd/es/carousel";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
-const quizzes = [
-  {
-    id: 1,
-    title: "CHEMISTRY QUIZ",
-    image: "/images/chemistry.png",
-  },
-  {
-    id: 2,
-    title: "HISTORY QUIZ",
-    image: "/images/history.png",
-  },
-  {
-    id: 3,
-    title: "SCIENCE QUIZ",
-    image: "/images/science.png",
-  },
-  {
-    id: 4,
-    title: "MATH QUIZ",
-    image: "/images/maths.png",
-  },
-  {
-    id: 5,
-    title: "PHYSICS QUIZ",
-    image: "/images/physics.png",
-  },
-];
-
 export default function Home() {
+  const [quizzes, setQuizzes] = useState<any[]>([]);
   const carouselRef = useRef<CarouselRef>(null);
+
+  const fetchQuizzes = async () => {
+    try {
+      const response = await fetch("/api/quizzes/getQuizzes");
+      if (!response.ok) throw new Error("Failed to fetch quizzes");
+      const { data } = await response.json();
+      setQuizzes(data);
+    } catch (error) {
+      console.error("Failed to fetch quizzes", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       <section className="py-12">
@@ -59,21 +49,13 @@ export default function Home() {
               { breakpoint: 768, settings: { slidesToShow: 1 } },
             ]}
           >
-            {quizzes.map((quiz, index) => (
+            {quizzes.map((quiz: any, index: number) => (
               <div key={index} className="px-2">
-                <div className="grid grid-cols-3">
-                  <div className="p-4 col-span-1 bg-blue-800 text-center flex flex-col items-center justify-center text-white font-workSans text-lg font-semibold rounded-l-lg">
-                    {quiz.title}
-                    <FaArrowRight className="text-orange-300 mt-2" />
-                  </div>
-                  <div className="col-span-2">
-                    <img
-                      alt={quiz.title}
-                      src={quiz.image}
-                      className="object-cover h-40 w-full rounded-r-lg"
-                    />
-                  </div>
-                </div>
+                <QuizCard
+                  id={quiz.id.toString()}
+                  title={quiz.title}
+                  image={quiz.image || "/images/chemistry.png"} // Fallback to default image if none available
+                />
               </div>
             ))}
           </Carousel>

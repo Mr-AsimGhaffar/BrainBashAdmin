@@ -2,14 +2,11 @@
 
 import { Input, message, Pagination } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { FaArrowRight } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Quiz } from "@/lib/definitions";
+import QuizCard from "@/components/quiz/QuizCard";
 
 export default function QuizListPage() {
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const router = useRouter();
+  const [quizzes, setQuizzes] = useState<any[]>([]);
 
   const fetchQuizzes = async () => {
     try {
@@ -19,6 +16,7 @@ export default function QuizListPage() {
       const formattedData = data.map((quiz: any) => ({
         id: quiz.id,
         title: quiz.title,
+        image: "/images/chemistry.png", // Assuming a default image, can be updated based on API response
       }));
       setQuizzes(formattedData);
     } catch (error) {
@@ -30,14 +28,10 @@ export default function QuizListPage() {
     fetchQuizzes();
   }, []);
 
-  const handleQuizClick = (quizId: string = "") => {
-    router.push(`/index/quizzesList/${quizId}`);
-  };
-
   return (
     <div>
       <div className="flex items-center justify-between py-16">
-        <h1 className="text-3xl font-bold font-montserrat">Quizz List</h1>
+        <h1 className="text-3xl font-bold font-montserrat">Quiz List</h1>
         <div>
           <Input
             placeholder="Search here"
@@ -48,25 +42,12 @@ export default function QuizListPage() {
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {quizzes.map((quiz, index) => (
-          <div
+          <QuizCard
             key={index}
-            className="shadow-md cursor-pointer"
-            onClick={() => handleQuizClick(quiz.id)}
-          >
-            <div className="grid grid-cols-3">
-              <div className="p-4 col-span-1 bg-blue-800 text-center flex flex-col items-center justify-center text-white font-workSans text-lg font-semibold rounded-l-lg">
-                {quiz.title}
-                <FaArrowRight className="text-orange-300 mt-2" />
-              </div>
-              <div className="col-span-2">
-                <img
-                  alt={quiz.title}
-                  src="/images/chemistry.png"
-                  className="object cover h-40 w-full rounded-r-lg"
-                />
-              </div>
-            </div>
-          </div>
+            id={quiz.id}
+            title={quiz.title}
+            image={quiz.image}
+          />
         ))}
       </div>
       <div className="flex justify-center mt-6">

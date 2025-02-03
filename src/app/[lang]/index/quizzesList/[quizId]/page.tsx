@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "antd";
 import { Quiz } from "@/lib/definitions";
+import { useQuizSession } from "@/hooks/context/QuizSessionContext";
 
 export default function QuizDetailPage() {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isQuizStarted, setIsQuizStarted] = useState(false);
+  const { setQuizSession } = useQuizSession();
   const router = useRouter();
   const searchParams = useParams<{ quizId: string }>();
 
@@ -44,7 +46,8 @@ export default function QuizDetailPage() {
 
       if (result.data) {
         setIsQuizStarted(true);
-        router.push(`/index/startQuiz?sessionId=${result.data.id}`);
+        setQuizSession(result.data.quizSession);
+        router.push(`/index/startQuiz`);
       }
     } catch (error) {
       console.error("Error starting quiz:", error);

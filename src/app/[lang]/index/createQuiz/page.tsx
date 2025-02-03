@@ -1,8 +1,14 @@
 "use client";
 
 import { Button, Card } from "antd";
+import { useRouter } from "next/navigation";
 
 export default function CreateQuizPage() {
+  const router = useRouter();
+
+  const CreateQuizRoute = () => {
+    router.push("/index/manageQuizzes");
+  };
   return (
     <div className="grid grid-cols-2 gap-4 py-44">
       {/* Left Section */}
@@ -22,7 +28,11 @@ export default function CreateQuizPage() {
           <li>Quizzes help students learn and engage</li>
           <li>Quizzes help students learn and engage with subjects</li>
         </ul>
-        <Button type="primary" className="mt-4 bg-blue-700">
+        <Button
+          type="primary"
+          className="mt-4 bg-blue-700"
+          onClick={CreateQuizRoute}
+        >
           Create Quizz
         </Button>
       </div>

@@ -42,6 +42,12 @@ export default async function handler(
             maxAge: 60 * 60 * 24 * 7,
             path: "/",
           }),
+          serialize("role", data.data.user.role, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 60 * 60 * 24 * 7,
+            path: "/",
+          }),
         ];
 
         res.setHeader("Set-Cookie", cookies);

@@ -1,35 +1,35 @@
 "use client";
 
+import { useQuizSession } from "@/hooks/context/QuizSessionContext";
+import FormatTime from "@/utils/FormatTime";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
 
 const StartQuizPage = () => {
-  const searchParams = useParams<{ sessionId: string }>();
-
-  const [quizSession, setQuizSession] = useState<any>(null);
+  const { quizSession } = useQuizSession();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [timer, setTimer] = useState<number>(0);
   const [timeExpired, setTimeExpired] = useState(false);
 
-  const fetchSession = async (sessionId: string) => {
-    const response = await fetch(
-      `/api/quizSession/getQuizSession?sessionId=${sessionId}`
-    );
-    const result = await response.json();
-    setQuizSession(result.data);
-    const quizEndTime = new Date(result.data.endTime).getTime();
-    const quizStartTime = new Date(result.data.startTime).getTime();
-    setTimer((quizEndTime - quizStartTime) / 1000);
-  };
-
   useEffect(() => {
-    const sessionId = searchParams?.sessionId;
-    if (sessionId) {
-      fetchSession(sessionId);
+    if (quizSession?.quiz) {
+      const quizEndTime = new Date(quizSession.endTime).getTime();
+      const quizStartTime = new Date(quizSession.startTime).getTime();
+      const currentTime = new Date().getTime(); // Get the current time
+
+      // Calculate the remaining time in seconds
+      const remainingTime = Math.floor((quizEndTime - currentTime) / 1000);
+
+      // Ensure the remaining time is positive, if not set it to 0
+      if (remainingTime > 0) {
+        setTimer(remainingTime);
+      } else {
+        setTimer(0);
+        setTimeExpired(true);
+      }
     }
-  }, [searchParams?.sessionId]);
+  }, [quizSession]);
 
   useEffect(() => {
     if (timer > 0) {
@@ -49,46 +49,45 @@ const StartQuizPage = () => {
   }, [timer]);
 
   const handleNextQuestion = async () => {
-    if (
-      selectedAnswer ===
-      quizSession?.quiz.questions[currentQuestionIndex]?.correctAnswer
-    ) {
-      setScore(score + 1);
-    }
-
-    await fetch("/api/quizSession/submitQuizAnswer", {
+    const response = await fetch("/api/quizSession/submitQuizAnswer", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        sessionId: searchParams?.sessionId,
+        sessionId: quizSession?.id,
         questionId: quizSession?.quiz.questions[currentQuestionIndex]?.id,
-        selectedAnswer,
+        answer: selectedAnswer,
       }),
     });
+
+    const result = await response.json();
+
+    if (result.data?.score !== undefined) {
+      setScore(result.data.score);
+    }
 
     if (currentQuestionIndex < quizSession?.quiz.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedAnswer(null);
       setTimeExpired(false);
     } else {
-      window.location.href = `/index/endQuiz?score=${score}`;
+      window.location.href = `/index/startQuiz/${result.data?.score || score}`;
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex justify-center">
       <div className="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6 text-center">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">
-          What Very Big Thing Happened on This Day?
+          {quizSession?.quiz.title}
         </h2>
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-left mb-4">
           <span className="text-gray-600">
-            {currentQuestionIndex + 1} of {quizSession?.quiz.questions.length}
+            Questions {currentQuestionIndex + 1} of{" "}
+            {quizSession?.quiz.questions.length}
           </span>
-          <span className="text-gray-600">Score: {score}</span>
         </div>
         <div className="text-red-500 font-bold mb-4">
-          Time Remaining: {timer} seconds
+          Time Remaining: {FormatTime(timer)}
         </div>
         {timeExpired && (
           <div className="text-red-600 font-semibold mb-4">

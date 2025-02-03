@@ -5,6 +5,10 @@
   color: #83aff6 !important;
   font-weight: 600;
 }
+.custom-select .ant-select-selection-placeholder {
+  color: #83aff6 !important;
+  font-weight: 600;
+}
 .dark ::placeholder {
   color: #60a5fa;
 }

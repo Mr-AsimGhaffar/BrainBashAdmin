@@ -1,17 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Button, Table, Tag, Modal, message } from "antd";
-import { UserAddOutlined } from "@ant-design/icons";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Table, Tag, Modal, message, Input } from "antd";
+import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import UserForm from "@/components/user/UserForm";
+import FormatString from "@/utils/FormatString";
+import debounce from "lodash.debounce";
+import SearchFilterUsers from "@/components/user/SearchFilterUsers";
 
 interface User {
   key: string;
   id: number;
-  firstName: string;
-  lastName: string;
+  username: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -27,10 +29,13 @@ export default function UserPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [searchUserName, setSearchUserName] = useState("");
+  const [searchEmail, setSearchEmail] = useState("");
+  const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
     username: "",
     email: "",
-    "role.name": [] as string[],
+    role: [] as string[],
     password: "",
     confirmPassword: "",
     status: [] as string[],
@@ -47,14 +52,12 @@ export default function UserPage() {
     setLoading(true);
     try {
       const filtersObject = {
-        ...(currentFilters.status ? { status: currentFilters.status } : {}),
         ...(currentFilters.username
           ? { username: currentFilters.username }
           : {}),
         ...(currentFilters.email ? { email: currentFilters.email } : {}),
-        ...(currentFilters["role.name"]
-          ? { "role.name": currentFilters["role.name"] }
-          : {}),
+        ...(currentFilters.role ? { role: currentFilters.role } : {}),
+        ...(currentFilters.status ? { status: currentFilters.status } : {}),
       };
       const sort = sortParams
         .map((param) => `${param.field}:${param.order}`)
@@ -92,34 +95,206 @@ export default function UserPage() {
     }
   };
 
+  const debouncedFetchCompanies = debounce(
+    (currentFilters) => fetchUsers(currentFilters),
+    500,
+    { leading: true, trailing: false }
+  );
+  const handleFilterChange = (key: string, value: string) => {
+    const updatedFilters = { ...filters, [key]: value };
+    setFilters(updatedFilters);
+    debouncedFetchCompanies(updatedFilters);
+  };
+  const handleGeneralSearch = (
+    value: string,
+    newFilters: { role: string[]; status: string[] }
+  ) => {
+    setSearch(value);
+    setFilters((prevFilters) => {
+      const updatedFilters = { ...prevFilters };
+      if (newFilters.role.length > 0) {
+        updatedFilters["role"] = newFilters.role;
+      } else {
+        delete (updatedFilters as Partial<typeof updatedFilters>)["role"];
+      }
+      if (newFilters.status.length > 0) {
+        updatedFilters["status"] = newFilters.status;
+      } else {
+        delete (updatedFilters as Partial<typeof updatedFilters>)["status"];
+      }
+
+      return updatedFilters;
+    });
+  };
+  const handleSort = (field: string) => {
+    let newSortParams = [...sortParams];
+    const existingIndex = newSortParams.findIndex(
+      (param) => param.field === field
+    );
+
+    if (existingIndex !== -1) {
+      const currentOrder = newSortParams[existingIndex].order;
+      if (currentOrder === "asc") {
+        newSortParams[existingIndex].order = "desc";
+      } else if (currentOrder === "desc") {
+        newSortParams.splice(existingIndex, 1);
+      }
+    } else {
+      newSortParams.push({ field, order: "asc" });
+    }
+
+    setSortParams(newSortParams);
+  };
+
   useEffect(() => {
     fetchUsers();
   }, [sortParams, search, filters]);
 
-  const formatString = (str: any) => {
-    if (!str) return "";
-    return str
-      .split("_") // Split by underscore
-      .map(
-        (word: any) =>
-          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-      ) // Capitalize first letter of each word
-      .join(" "); // Join the words back together with spaces
-  };
-
   const columns: ColumnsType<User> = [
     {
-      title: <span className="flex items-center gap-2">Username</span>,
+      title: (
+        <span className="flex items-center gap-2">
+          Username
+          {sortParams.find((param) => param.field === "username") ? (
+            sortParams.find((param) => param.field === "username")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("username")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("username")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("username")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "username",
       key: "username",
       className: "font-workSans",
-      render: (text) => <p>{formatString(text)}</p>,
+      render: (text) => <p>{FormatString(text)}</p>,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search User Name"
+            value={searchUserName}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchUserName ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "username";
+              setSearchUserName(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("username", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("firstName", searchUserName)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchUserName("");
+                handleFilterChange("username", "");
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchUserName ? "blue" : "gray" }} />
+      ),
     },
     {
-      title: <span className="flex items-center gap-2">Email</span>,
+      title: (
+        <span className="flex items-center gap-2">
+          Email
+          {sortParams.find((param) => param.field === "email") ? (
+            sortParams.find((param) => param.field === "email")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("email")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("email")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("email")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "email",
       key: "email",
       className: "font-workSans",
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Email"
+            value={searchEmail}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchEmail ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const searchValue = "email";
+              setSearchEmail(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("email", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("email", searchEmail)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchEmail("");
+                handleFilterChange("email", "");
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchEmail ? "blue" : "gray" }} />
+      ),
     },
     {
       title: <span className="flex items-center gap-2">Role</span>,
@@ -128,7 +303,7 @@ export default function UserPage() {
       className: "font-workSans",
       render: (role) => {
         if (role) {
-          return <p>{formatString(role)}</p>;
+          return <p>{FormatString(role)}</p>;
         }
         return null;
       },
@@ -146,7 +321,7 @@ export default function UserPage() {
         };
         return (
           <Tag color={statusColors[status] || "default"}>
-            {formatString(status)}
+            {FormatString(status)}
           </Tag>
         );
       },
@@ -257,8 +432,13 @@ export default function UserPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold font-montserrat">Manage Users</h1>
+      <div className="mb-6 flex items-center gap-6">
+        <div>
+          <h1 className="text-3xl font-bold font-montserrat">Manage Users</h1>
+        </div>
+        <div>
+          <SearchFilterUsers onFilterChange={handleGeneralSearch} />
+        </div>
       </div>
       {/* <div className="flex justify-between items-center  mb-4">
         <div className="flex items-center gap-4">

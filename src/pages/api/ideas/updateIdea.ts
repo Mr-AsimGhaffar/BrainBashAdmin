@@ -5,17 +5,23 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method === "POST") {
-    const { quizId } = req.body;
+  if (req.method === "PUT") {
+    const { id, title, description } = req.body;
 
     try {
       const accessToken = req.cookies.accessToken || "";
       const refreshToken = req.cookies.refreshToken || "";
 
+      // Send credentials to external API
       const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/quizzes/${quizId}/start-session`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/ideas/${id}`,
         {
-          method: "POST",
+          method: "PUT",
+          body: JSON.stringify({
+            id,
+            title,
+            description,
+          }),
         },
         { accessToken, refreshToken }
       );
@@ -24,18 +30,20 @@ export default async function handler(
         const apiResponse = await response.json();
         return res.status(200).json({
           data: apiResponse.data,
-          message: "Quiz started successfully",
+          message: "Successfully updated idea",
         });
       } else {
         const errorData = await response.json();
-        return res.status(response.status).json({ message: errorData.message });
+        return res.status(response.status).json({
+          message: errorData.message || "Failed to update idea",
+        });
       }
     } catch (error) {
-      console.error("Error starting quiz session:", error);
+      console.error("Error authenticating:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   } else {
-    res.setHeader("Allow", ["POST"]);
+    res.setHeader("Allow", ["PUT"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

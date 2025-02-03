@@ -18,6 +18,7 @@ interface Props {
 
 export default function NavbarContent({ locale, messages }: Props) {
   const { user } = useUser();
+  const role = user?.role || "";
   const { settings } = useSettings();
   const router = useRouter();
   const pathname = usePathname();
@@ -78,22 +79,26 @@ export default function NavbarContent({ locale, messages }: Props) {
     setUserMenuOpen(false);
   });
 
-  const navLinks = [
-    { href: `/${locale}/index/users`, label: "Manage Users" },
-    { href: `/${locale}/index/manageQuizzes`, label: "Manage Quizzes" },
-    { href: `/${locale}/index/subjects`, label: "Subjects" },
-    // { href: `/${locale}/index/reports`, label: "Reports" },
-    { href: `/${locale}/index/settings`, label: "Settings" },
-    { href: `/${locale}/index/accessLogs`, label: "Access Logs" },
-    // { href: `/${locale}/index/activities`, label: "User Activities" },
-    { href: `/${locale}/index/manageFeedback`, label: "Manage Feedback" },
-    // { href: `/${locale}/index/notifications`, label: "Notifications" },
-    // { href: `/${locale}/index/achievements`, label: "Achievements" },
-    // { href: `/${locale}/index/manageWidgets`, label: "Manage Widgets" },
+  const userLinks = [
     { href: `/${locale}/index/quizHome`, label: "Quiz Home" },
     { href: `/${locale}/index/createQuiz`, label: "Create Quiz" },
     { href: `/${locale}/index/quizzesList`, label: "Quizzes List" },
+    { href: `/${locale}/index/ideas`, label: "Ideas" },
+    { href: `/${locale}/index/manageQuizzes`, label: "Manage Quizzes" },
   ];
+
+  const adminLinks = [
+    { href: `/${locale}/index/users`, label: "Manage Users" },
+    { href: `/${locale}/index/manageQuizzes`, label: "Manage Quizzes" },
+    { href: `/${locale}/index/subjects`, label: "Subjects" },
+    { href: `/${locale}/index/settings`, label: "Settings" },
+    { href: `/${locale}/index/accessLogs`, label: "Access Logs" },
+    { href: `/${locale}/index/manageFeedback`, label: "Manage Feedback" },
+    { href: `/${locale}/index/ideas`, label: "Ideas" },
+  ];
+
+  const navLinks =
+    role === "ADMIN" || role === "SUPER_ADMIN" ? adminLinks : userLinks;
 
   return (
     <IntlProvider locale={locale} messages={messages}>

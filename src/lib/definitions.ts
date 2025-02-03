@@ -4,9 +4,7 @@ export type User = {
   id: string;
   username: string;
   email: string;
-  role: {
-    name: string;
-  };
+  role: string;
   status: string;
   contacts: string;
   profilePicture: string;
@@ -21,6 +19,40 @@ export interface ProjectSettings {
   id: number;
   title: string;
   email: string;
+}
+
+interface QuizDetail {
+  id: number;
+  title: string;
+  questions: QuestionDetail[];
+}
+
+interface QuestionDetail {
+  id: number;
+  question: string;
+  type: "MULTIPLE_CHOICE";
+  options: string[];
+}
+
+interface QuizSessionDetail {
+  id: number;
+  userId: number;
+  quizId: number;
+  startTime: string;
+  endTime: string;
+  status: "IN_PROGRESS" | "COMPLETED" | "PENDING";
+  score: number;
+  createdAt: string;
+  updatedAt: string;
+  guestUserId: number | null;
+  quiz: QuizDetail;
+}
+
+export interface QuizSessionResponse {
+  data: {
+    quizSession: QuizSessionDetail;
+  };
+  message: string;
 }
 
 export interface StatsResponse {
@@ -149,6 +181,13 @@ export interface Subject {
   key: string;
   id: number;
   name: string;
+}
+
+export interface Idea {
+  key: string;
+  id: number;
+  title: string;
+  description: string;
 }
 
 export interface AccessLogUser {

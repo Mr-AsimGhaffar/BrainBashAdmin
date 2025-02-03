@@ -11,6 +11,7 @@ import { Inter, Work_Sans, Montserrat } from "next/font/google";
 import "@/app/globals.css";
 import { NotificationProvider } from "@/hooks/context/NotificationContext";
 import { SettingsProvider } from "@/hooks/context/ProjectSettingContext";
+import { QuizSessionProvider } from "@/hooks/context/QuizSessionContext";
 
 export const metadata = {
   title: "BrainBash Admin",
@@ -61,16 +62,18 @@ export default async function Root({ params, children }: Props) {
           }}
         >
           <UserProvider initialUser={user}>
-            <SettingsProvider initialSettings={projectSettings}>
-              <NotificationProvider>
-                {!isAuthPage && (
-                  <>
-                    <Navbar locale={params.lang} />
-                  </>
-                )}
-                {isAuthPage ? children : <Content>{children}</Content>}
-              </NotificationProvider>
-            </SettingsProvider>
+            <QuizSessionProvider>
+              <SettingsProvider initialSettings={projectSettings}>
+                <NotificationProvider>
+                  {!isAuthPage && (
+                    <>
+                      <Navbar locale={params.lang} />
+                    </>
+                  )}
+                  {isAuthPage ? children : <Content>{children}</Content>}
+                </NotificationProvider>
+              </SettingsProvider>
+            </QuizSessionProvider>
           </UserProvider>
         </ConfigProvider>
       </body>
