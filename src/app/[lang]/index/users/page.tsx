@@ -403,6 +403,7 @@ export default function UserPage() {
             )
           );
           message.success(result.message);
+          fetchUsers();
           setIsModalOpen(false);
         } else {
           const error = await response.json();

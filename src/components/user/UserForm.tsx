@@ -23,8 +23,10 @@ export default function UserForm({
         ...initialValues,
         phoneNumber: initialValues.phoneNumber || "",
       });
+      setPhoneValue(initialValues.phoneNumber || "");
     } else {
       form.resetFields();
+      setPhoneValue("");
     }
   }, [initialValues, form]);
 
@@ -73,17 +75,6 @@ export default function UserForm({
         </Form.Item>
 
         <Form.Item
-          name="email"
-          label="Email"
-          rules={[
-            { required: true, message: "Please enter email" },
-            { type: "email", message: "Please enter a valid email address" },
-          ]}
-        >
-          <Input placeholder="Enter email" />
-        </Form.Item>
-
-        <Form.Item
           name="phoneNumber"
           label="Phone Number"
           rules={[
@@ -93,7 +84,9 @@ export default function UserForm({
             },
             () => ({
               validator(_, value) {
-                if (!phoneValue || !isValidPhoneNumber(phoneValue)) {
+                const phoneToValidate =
+                  value || form.getFieldValue("phoneNumber");
+                if (!phoneToValidate || !isValidPhoneNumber(phoneToValidate)) {
                   return Promise.reject(
                     new Error("Invalid phone number format")
                   );
@@ -107,7 +100,10 @@ export default function UserForm({
             international
             defaultCountry="US"
             value={phoneValue}
-            onChange={setPhoneValue}
+            onChange={(value) => {
+              setPhoneValue(value);
+              form.setFieldsValue({ phoneNumber: value }); // Keep form and state in sync
+            }}
             className="border rounded-md pl-2 flex items-center h-8"
             flagComponent={({ country }) => <div></div>}
           />
