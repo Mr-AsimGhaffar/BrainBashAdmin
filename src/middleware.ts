@@ -50,11 +50,7 @@ export function middleware(request: NextRequest) {
   const isProtectedRoute = routeSegment === "index";
   const isAuthRoute = routeSegment === "auth";
   const hasValidToken = request.cookies.has("accessToken");
-  const role = request.cookies.get("role")?.value; // Get the role from cookies
-
-  // Debugging: Log the role and token to the console for debugging purposes
-  console.log("Role from cookies:", role);
-  console.log("Has valid token:", hasValidToken);
+  const role = request.cookies.get("role")?.value;
 
   // Handle protected routes
   if (isProtectedRoute && !hasValidToken) {
@@ -66,15 +62,11 @@ export function middleware(request: NextRequest) {
   // Role-based redirection logic
   if (hasValidToken && isAuthRoute) {
     if (role === "USER") {
-      // If role is USER, redirect to /index/quizHome
-      console.log("User is redirected to /index/quizHome");
       return NextResponse.redirect(
         new URL(`/${localePart}/index/quizHome`, request.url)
       );
     }
     if (role === "ADMIN" || role === "SUPER_ADMIN") {
-      // If role is ADMIN or SUPER_ADMIN, redirect to /index/home
-      console.log("Admin or SuperAdmin is redirected to /index/home");
       return NextResponse.redirect(
         new URL(`/${localePart}/index/home`, request.url)
       );

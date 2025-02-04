@@ -6,8 +6,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "PUT") {
-    const { id } = req.query;
-    const { email } = req.body;
+    const { id, username, email, phoneNumber, status, role } = req.body;
 
     try {
       const accessToken = req.cookies.accessToken || "";
@@ -19,7 +18,12 @@ export default async function handler(
         {
           method: "PUT",
           body: JSON.stringify({
+            id,
+            username,
             email,
+            phoneNumber,
+            status,
+            role,
           }),
         },
         { accessToken, refreshToken }

@@ -50,7 +50,7 @@ const FilterBar: React.FC<SearchFiltersUsersProps> = ({ onFilterChange }) => {
         <div>
           <Input
             placeholder="Search users"
-            prefix={<SearchOutlined />}
+            prefix={<SearchOutlined className="text-blue-500" />}
             value={searchValue}
             onChange={(e) => handleSearch(e.target.value)}
             className="w-80"

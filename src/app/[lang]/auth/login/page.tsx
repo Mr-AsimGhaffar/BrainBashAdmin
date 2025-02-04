@@ -17,6 +17,7 @@ export default function LoginPage({
   const [loadingForgotPassword, setLoadingForgotPassword] = useState(false);
   const [loadingSignUp, setLoadingSignUp] = useState(false);
 
+  // Updated onFinish handler
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
@@ -28,14 +29,32 @@ export default function LoginPage({
         body: JSON.stringify(values),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
+        if (!data.user) {
+          message.error("User data not found in response");
+          return;
+        }
+        if (!data.user.role) {
+          message.error("Role not found in user data");
+          return;
+        }
+
+        const userRole = data.user.role;
+        let redirectUrl = `/${lang}/index/home`;
+
+        if (userRole === "USER") {
+          redirectUrl = `/${lang}/index/quizHome`;
+        }
+
         message.success("Successfully logged in!");
         router.push(redirectUrl);
       } else {
-        const data = await response.json();
         message.error(data.message || "Invalid credentials");
       }
     } catch (error) {
+      console.error("Login error:", error);
       message.error("An error occurred during login");
     } finally {
       setLoading(false);

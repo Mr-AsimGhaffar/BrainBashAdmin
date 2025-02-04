@@ -104,7 +104,21 @@ export default function NavbarContent({ locale, messages }: Props) {
     <IntlProvider locale={locale} messages={messages}>
       <nav className="p-2 fixed top-0 left-0 z-50 w-full bg-white border-b border-gray-300 shadow-md">
         <div className="flex items-center justify-between">
-          <Link href={`/${locale}/index/home`}>
+          {role !== "USER" ? (
+            <Link href={`/${locale}/index/home`}>
+              <div className="flex items-center justify-start cursor-pointer">
+                <img
+                  src="/images/brain-bash-logo.png"
+                  alt="Ueber Pro Logo"
+                  width={70}
+                  height={70}
+                />
+                <span className="font-sansInter text-xl tracking-wide text-black font-semibold opacity-80">
+                  {settings?.title}
+                </span>
+              </div>
+            </Link>
+          ) : (
             <div className="flex items-center justify-start">
               <img
                 src="/images/brain-bash-logo.png"
@@ -116,7 +130,7 @@ export default function NavbarContent({ locale, messages }: Props) {
                 {settings?.title}
               </span>
             </div>
-          </Link>
+          )}
           <div
             className={clsx(
               "lg:flex lg:items-center lg:justify-between lg:w-auto w-full",

@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Table, Tag, Modal, message, Input } from "antd";
+import {
+  Button,
+  Table,
+  Tag,
+  Modal,
+  message,
+  Input,
+  Space,
+  Popconfirm,
+} from "antd";
 import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
@@ -316,8 +325,7 @@ export default function UserPage() {
       render: (status: string) => {
         const statusColors: { [key: string]: string } = {
           ACTIVE: "green",
-          IN_ACTIVE: "gray",
-          SUSPENDED: "red",
+          DISABLED: "gray",
         };
         return (
           <Tag color={statusColors[status] || "default"}>
@@ -331,17 +339,22 @@ export default function UserPage() {
       key: "action",
       className: "font-workSans",
       render: (_, record) => (
-        <Button type="link" onClick={() => handleEdit(record)}>
-          <FaEdit className="text-lg text-teal-800" />
-        </Button>
+        <Space>
+          <Button type="link" onClick={() => handleEdit(record)}>
+            <FaEdit className="text-lg text-teal-800" />
+          </Button>
+          <Popconfirm
+            title="Are you sure to delete this user?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button danger>Delete</Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
-
-  const handleAddUser = () => {
-    setSelectedUser(null);
-    setIsModalOpen(true);
-  };
 
   // Handle edit button click
   const handleEdit = async (company: User) => {
@@ -399,30 +412,53 @@ export default function UserPage() {
         console.error("Error updating user:", error);
         message.error("An error occurred while updating the user");
       }
-    } else {
-      // Add user
-      try {
-        const response = await fetch("/api/createUser", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        });
+    }
+  };
 
-        if (response.ok) {
-          const result = await response.json();
-          setUsers((prevUsers) => [result.data, ...prevUsers]);
-          message.success("Successfully added user");
-          setIsModalOpen(false);
-        } else {
-          const error = await response.json();
-          message.error(error.message || "Failed to add user");
-        }
-      } catch (error) {
-        console.error("Error adding user:", error);
-        message.error("An error occurred while adding the user");
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`/api/deleteUser?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete user");
+
+      message.success("User deleted successfully");
+      fetchUsers();
+    } catch (error) {
+      let errorMessage = "Failed to fetch users";
+      if (error instanceof Error) {
+        errorMessage = error.message;
       }
+      message.error(errorMessage);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await fetch(`/api/exportUser`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "user_logs.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        message.success("CSV file downloaded successfully!");
+      } else {
+        message.error("Failed to export users.");
+      }
+    } catch (error) {
+      console.error("Error exporting users:", error);
+      message.error("An error occurred while exporting users.");
     }
   };
 
@@ -439,20 +475,12 @@ export default function UserPage() {
         <div>
           <SearchFilterUsers onFilterChange={handleGeneralSearch} />
         </div>
-      </div>
-      {/* <div className="flex justify-between items-center  mb-4">
-        <div className="flex items-center gap-4">
-          <Button
-            type="primary"
-            size="large"
-            icon={<UserAddOutlined />}
-            onClick={handleAddUser}
-            className="font-sansInter"
-          >
-            Add User
+        <div>
+          <Button type="primary" onClick={handleExportCSV}>
+            Export CSV
           </Button>
         </div>
-      </div> */}
+      </div>
 
       <Table
         columns={columns}

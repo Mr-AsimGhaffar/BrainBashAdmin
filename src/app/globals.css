@@ -9,6 +9,23 @@
   color: #83aff6 !important;
   font-weight: 600;
 }
+.PhoneInputCountry {
+  width: 40% !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.PhoneInputCountrySelect {
+  width: 100% !important;
+  appearance: none;
+  padding-right: 1.5rem;
+}
+.PhoneInputCountrySelectArrow {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+}
 .dark ::placeholder {
   color: #60a5fa;
 }

@@ -13,12 +13,15 @@ import { NotificationProvider } from "@/hooks/context/NotificationContext";
 import { SettingsProvider } from "@/hooks/context/ProjectSettingContext";
 import { QuizSessionProvider } from "@/hooks/context/QuizSessionContext";
 
-export const metadata = {
-  title: "BrainBash Admin",
-  icons: {
-    icon: "/images/brain-bash-logo.png",
-  },
-};
+export async function generateMetadata() {
+  const projectSettings = await getProjectSettings();
+  return {
+    title: projectSettings?.title || "BrainBash Admin",
+    icons: {
+      icon: "/images/brain-bash-logo.png",
+    },
+  };
+}
 
 const inter = Inter({
   subsets: ["latin"],
