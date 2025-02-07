@@ -11,7 +11,7 @@ interface Subject {
 
 export interface Question {
   questionText: string;
-  type: "Multiple Choice" | "True/False" | "Short Answer";
+  type: "Multiple Choice" | "True/False";
   options?: string[];
   correctAnswer: string;
 }
@@ -291,7 +291,6 @@ const QuizForm = ({
                 }}
               >
                 <Space direction="vertical" style={{ width: "100%" }}>
-                  {/* Question Text */}
                   <Form.Item
                     {...restField}
                     label="Question"
@@ -306,7 +305,20 @@ const QuizForm = ({
                     <Input />
                   </Form.Item>
 
-                  {/* Question Type */}
+                  <Form.Item
+                    {...restField}
+                    label="Correct Answer"
+                    name={[name, "correctAnswer"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input the correct answer!",
+                      },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
+
                   <Form.Item
                     {...restField}
                     label="Type"
@@ -317,6 +329,65 @@ const QuizForm = ({
                   >
                     <Select options={questionTypes} />
                   </Form.Item>
+
+                  <Form.Item shouldUpdate>
+                    {() => {
+                      const isMultipleChoice =
+                        form.getFieldValue(["questions", name, "type"]) ===
+                        "MULTIPLE_CHOICE";
+                      return (
+                        <div
+                          style={{
+                            display: isMultipleChoice ? "block" : "none",
+                          }}
+                        >
+                          <Form.List name={[name, "options"]}>
+                            {(
+                              optionFields,
+                              { add: addOption, remove: removeOption }
+                            ) => (
+                              <>
+                                {optionFields.map((optionField, index) => (
+                                  <Form.Item
+                                    key={optionField.key}
+                                    label={`Option ${index + 1}`}
+                                    name={[optionField.name]}
+                                    rules={[
+                                      {
+                                        required: true,
+                                        message: "Please input the option!",
+                                      },
+                                    ]}
+                                  >
+                                    <Input
+                                      addonAfter={
+                                        <Button
+                                          danger
+                                          onClick={() =>
+                                            removeOption(optionField.name)
+                                          }
+                                        >
+                                          Remove
+                                        </Button>
+                                      }
+                                    />
+                                  </Form.Item>
+                                ))}
+                                <Button
+                                  type="dashed"
+                                  onClick={() => addOption()}
+                                  block
+                                >
+                                  Add Option
+                                </Button>
+                              </>
+                            )}
+                          </Form.List>
+                        </div>
+                      );
+                    }}
+                  </Form.Item>
+
                   <Button
                     type="primary"
                     onClick={async () => {
@@ -338,7 +409,6 @@ const QuizForm = ({
                       : "Save Question"}
                   </Button>
 
-                  {/* Remove Question Button */}
                   <Button
                     onClick={() => {
                       const questionData = form.getFieldValue([
@@ -358,7 +428,7 @@ const QuizForm = ({
                 </Space>
               </div>
             ))}
-            {/* Add Question Button */}
+
             <Button type="dashed" onClick={() => add()} block>
               Add Question
             </Button>

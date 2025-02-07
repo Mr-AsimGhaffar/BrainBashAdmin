@@ -1,13 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Button } from "antd";
+import { Button, Spin } from "antd";
 import { Quiz } from "@/lib/definitions";
 import { useQuizSession } from "@/hooks/context/QuizSessionContext";
 
 export default function QuizDetailPage() {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isQuizStarted, setIsQuizStarted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { setQuizSession } = useQuizSession();
   const router = useRouter();
   const searchParams = useParams<{ quizId: string }>();
@@ -32,6 +33,7 @@ export default function QuizDetailPage() {
   }, [searchParams?.quizId]);
 
   const handleStartQuiz = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/quizSession/startQuizSession", {
         method: "POST",
@@ -51,53 +53,57 @@ export default function QuizDetailPage() {
       }
     } catch (error) {
       console.error("Error starting quiz:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
+    <Spin spinning={loading} size="large">
       <div>
-        <img
-          src="/images/quizDetail.png"
-          alt="Chemistry Quiz"
-          className="rounded-lg w-full"
-        />
-      </div>
-      <div className="mt-10 grid grid-cols-2 gap-12">
-        <div className="py-8">
-          <h1 className="text-5xl font-bold text-blue-800">
-            {quiz?.title || "No Title"}
-          </h1>
-          <p className="text-gray-400 text-lg mt-4">
-            {quiz?.description || "No Description"}
-          </p>
-          {!isQuizStarted && (
-            <Button
-              type="primary"
-              size="large"
-              className="mt-4 bg-yellow-500 border-none text-white hover:bg-yellow-600"
-              onClick={handleStartQuiz}
-            >
-              Start Quiz
-            </Button>
-          )}
-        </div>
         <div>
-          <div className="py-8 shadow-2xl rounded-lg flex flex-col items-center justify-center h-full">
-            <p className="text-blue-600 font-medium text-lg">
-              17 Quiz Questions
+          <img
+            src="/images/quizDetail.png"
+            alt="Chemistry Quiz"
+            className="rounded-lg w-full"
+          />
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-12">
+          <div className="py-8">
+            <h1 className="text-5xl font-bold text-blue-800">
+              {quiz?.title || "No Title"}
+            </h1>
+            <p className="text-gray-400 text-lg mt-4">
+              {quiz?.description || "No Description"}
             </p>
-            <h2 className="text-4xl font-bold text-yellow-500">100/80</h2>
-            <p className="text-gray-600 text-yellow-500">Score</p>
-            <Button
-              type="primary"
-              className="mt-3 bg-blue-800 border-none hover:bg-blue-700"
-            >
-              Excellent
-            </Button>
+            {!isQuizStarted && (
+              <Button
+                type="primary"
+                size="large"
+                className="mt-4 bg-yellow-500 border-none text-white hover:bg-yellow-600"
+                onClick={handleStartQuiz}
+              >
+                Start Quiz
+              </Button>
+            )}
+          </div>
+          <div>
+            <div className="py-8 shadow-2xl rounded-lg flex flex-col items-center justify-center h-full">
+              <p className="text-blue-600 font-medium text-lg">
+                17 Quiz Questions
+              </p>
+              <h2 className="text-4xl font-bold text-yellow-500">100/80</h2>
+              <p className="text-gray-600 text-yellow-500">Score</p>
+              <Button
+                type="primary"
+                className="mt-3 bg-blue-800 border-none hover:bg-blue-700"
+              >
+                Excellent
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Spin>
   );
 }

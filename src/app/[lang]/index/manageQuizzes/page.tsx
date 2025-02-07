@@ -11,7 +11,7 @@ import {
   message,
   Popconfirm,
 } from "antd";
-import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { format } from "date-fns";
 import { Question, Quiz } from "@/lib/definitions";
@@ -77,18 +77,6 @@ const ManageQuizzes = () => {
       setLoading(false);
     }
   };
-
-  // const handleSearch = (value: string) => setSearchTerm(value);
-  // const handleStatusFilter = (value: string) => setStatusFilter(value);
-
-  // const filteredQuizzes = quizzes.filter((quiz) => {
-  //   const matchesSearch =
-  //     quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     quiz.description?.toLowerCase().includes(searchTerm.toLowerCase());
-  //   const matchesStatus =
-  //     statusFilter === "all" || quiz.status === statusFilter;
-  //   return matchesSearch && matchesStatus;
-  // });
 
   const handleCreateQuiz = async (values: Quiz) => {
     try {
@@ -198,13 +186,6 @@ const ManageQuizzes = () => {
   const columns: ColumnsType<ApiQuiz> = [
     { title: "ID", dataIndex: "id", key: "id" },
     { title: "Title", dataIndex: "title", key: "title" },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   render: (status: string) =>
-    //     status.charAt(0).toUpperCase() + status.slice(1),
-    // },
     {
       title: "Date",
       dataIndex: "createdAt",
@@ -248,26 +229,6 @@ const ManageQuizzes = () => {
           Add New Quiz
         </Button>
       </div>
-
-      {/* <div className="flex gap-4 mb-6">
-        <Input
-          placeholder="Search by title or description"
-          prefix={<SearchOutlined />}
-          onChange={(e) => handleSearch(e.target.value)}
-          className="w-64"
-        />
-        <Select
-          placeholder="All Statuses"
-          onChange={handleStatusFilter}
-          className="w-48"
-          options={[
-            { value: "all", label: "All Statuses" },
-            { value: "active", label: "Active" },
-            { value: "inactive", label: "Inactive" },
-            { value: "pending", label: "Pending" },
-          ]}
-        />
-      </div> */}
 
       <Table
         columns={columns}

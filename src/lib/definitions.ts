@@ -240,6 +240,12 @@ export interface QuizSession {
   userId: number;
 }
 
+export interface LeaderboardEntry {
+  username: string;
+  score: number;
+  rank: string;
+}
+
 export type Report = {
   filename: string;
   url: string;
