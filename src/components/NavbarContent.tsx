@@ -90,6 +90,7 @@ export default function NavbarContent({ locale, messages }: Props) {
   const adminLinks = [
     { href: `/${locale}/index/users`, label: "Manage Users" },
     { href: `/${locale}/index/manageQuizzes`, label: "Manage Quizzes" },
+    { href: `/${locale}/index/manageWidgets`, label: "Manage Widgets" },
     { href: `/${locale}/index/subjects`, label: "Subjects" },
     { href: `/${locale}/index/settings`, label: "Settings" },
     { href: `/${locale}/index/accessLogs`, label: "Access Logs" },

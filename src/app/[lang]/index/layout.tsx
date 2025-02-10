@@ -12,6 +12,7 @@ import "@/app/globals.css";
 import { NotificationProvider } from "@/hooks/context/NotificationContext";
 import { SettingsProvider } from "@/hooks/context/ProjectSettingContext";
 import { QuizSessionProvider } from "@/hooks/context/QuizSessionContext";
+import { WidgetSettingsProvider } from "@/hooks/context/WidgetSettingsContext";
 
 export async function generateMetadata() {
   const projectSettings = await getProjectSettings();
@@ -66,16 +67,18 @@ export default async function Root({ params, children }: Props) {
         >
           <UserProvider initialUser={user}>
             <QuizSessionProvider>
-              <SettingsProvider initialSettings={projectSettings}>
-                <NotificationProvider>
-                  {!isAuthPage && (
-                    <>
-                      <Navbar locale={params.lang} />
-                    </>
-                  )}
-                  {isAuthPage ? children : <Content>{children}</Content>}
-                </NotificationProvider>
-              </SettingsProvider>
+              <WidgetSettingsProvider>
+                <SettingsProvider initialSettings={projectSettings}>
+                  <NotificationProvider>
+                    {!isAuthPage && (
+                      <>
+                        <Navbar locale={params.lang} />
+                      </>
+                    )}
+                    {isAuthPage ? children : <Content>{children}</Content>}
+                  </NotificationProvider>
+                </SettingsProvider>
+              </WidgetSettingsProvider>
             </QuizSessionProvider>
           </UserProvider>
         </ConfigProvider>

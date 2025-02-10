@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Card } from "antd";
+import React, { useEffect, useState } from "react";
+import { Card, Spin, Alert } from "antd";
 import {
   LineChart,
   Line,
@@ -10,69 +10,107 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  ResponsiveContainer,
 } from "recharts";
 
-const userData = [
-  { date: "2024-11-18", newUsers: 0 },
-  { date: "2024-11-19", newUsers: 1 },
-  { date: "2024-11-20", newUsers: 0 },
-  { date: "2024-11-21", newUsers: 0 },
-  { date: "2024-11-22", newUsers: 0 },
-  { date: "2024-11-23", newUsers: 0 },
-  { date: "2024-11-24", newUsers: 0 },
-];
+interface UserGrowth {
+  date: string;
+  newUsers: number;
+}
 
 const UserGrowthChart = () => {
+  const [userData, setUserData] = useState<UserGrowth[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/stats/getStats");
+        if (!response.ok) {
+          throw new Error("Failed to fetch stats");
+        }
+        const data = await response.json();
+        setUserData(data.data.userGrowth);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const getLast7DaysData = (data: UserGrowth[]) => {
+    const today = new Date();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(today.getDate() - 6);
+
+    return data.filter((item) => {
+      const itemDate = new Date(item.date);
+      return itemDate >= sevenDaysAgo && itemDate <= today;
+    });
+  };
+
+  const filteredData = getLast7DaysData(userData);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <Alert message="Error" description={error} type="error" showIcon />;
+  }
+
   return (
-    <div
-      style={{
-        padding: "1rem",
-        backgroundColor: "#f9fafb",
-        borderRadius: "12px",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <Card
-        title="User Growth (Last 7 Days)"
-        style={{ textAlign: "center", fontWeight: "bold" }}
-      >
-        <LineChart width={500} height={300} data={userData}>
-          <defs>
-            <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity={0.8} />
-              <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis
-            dataKey="date"
-            stroke="#374151"
-            label={{ value: "Date", position: "insideBottom", offset: -5 }}
-          />
-          <YAxis
-            stroke="#374151"
-            label={{ value: "New Users", angle: -90, position: "insideLeft" }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "white",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              color: "#374151",
-            }}
-            labelStyle={{ color: "#2563eb" }}
-          />
-          <Legend wrapperStyle={{ bottom: -10 }} />
-          <Line
-            type="monotone"
-            dataKey="newUsers"
-            stroke="#2563eb"
-            strokeWidth={2}
-            dot={{ r: 4, fill: "#2563eb" }}
-            activeDot={{ r: 6 }}
-            fill="url(#lineGradient)"
-          />
-        </LineChart>
+    <div className="p-4 bg-gray-50 rounded-xl shadow-md">
+      <Card title="User Growth (Last 7 Days)" className="text-center font-bold">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={filteredData}>
+            <defs>
+              <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#2563eb" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis
+              dataKey="date"
+              stroke="#374151"
+              label={{ value: "Date", position: "insideBottom", offset: -5 }}
+              interval="preserveEnd"
+              padding={{ right: 35 }}
+            />
+            <YAxis
+              stroke="#374151"
+              label={{ value: "New Users", angle: -90, position: "insideLeft" }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
+                color: "#374151",
+              }}
+              labelStyle={{ color: "#2563eb" }}
+            />
+            <Legend wrapperStyle={{ bottom: -10 }} />
+            <Line
+              type="monotone"
+              dataKey="newUsers"
+              stroke="#2563eb"
+              strokeWidth={2}
+              dot={{ r: 4, fill: "#2563eb" }}
+              activeDot={{ r: 6 }}
+              fill="url(#lineGradient)"
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </Card>
     </div>
   );

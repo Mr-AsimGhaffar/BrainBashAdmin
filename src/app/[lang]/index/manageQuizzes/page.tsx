@@ -1,16 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import {
-  Table,
-  Button,
-  Input,
-  Select,
-  Space,
-  Modal,
-  Form,
-  message,
-  Popconfirm,
-} from "antd";
+import { Table, Button, Space, Modal, Form, message, Popconfirm } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { format } from "date-fns";
@@ -38,8 +28,6 @@ const ManageQuizzes = () => {
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
-  // const [searchTerm, setSearchTerm] = useState("");
-  // const [statusFilter, setStatusFilter] = useState<string>("all");
   const [form] = Form.useForm();
 
   const mapApiQuizToForm = (quiz: ApiQuiz): Quiz => ({
@@ -87,6 +75,12 @@ const ManageQuizzes = () => {
         expiryDate: values.expiryDate.toISOString(),
         maxScore: Number(values.maxScore),
         duration: Number(values.duration),
+        questions: values.questions.map((q) => ({
+          question: q.question,
+          type: q.type,
+          options: q.options || [],
+          answer: q.answer,
+        })),
       };
       const response = await fetch("/api/quizzes/createQuize", {
         method: "POST",
@@ -110,6 +104,13 @@ const ManageQuizzes = () => {
         expiryDate: values.expiryDate.toISOString(),
         maxScore: Number(values.maxScore),
         duration: Number(values.duration),
+        questions: values.questions.map((q) => ({
+          id: q.id || undefined,
+          question: q.question,
+          type: q.type,
+          options: q.options || [],
+          answer: q.answer,
+        })),
       };
       const response = await fetch(
         `/api/quizzes/updateQuiz?id=${selectedQuiz?.id}`,
@@ -129,9 +130,30 @@ const ManageQuizzes = () => {
     }
   };
 
-  const handleEdit = (quiz: ApiQuiz) => {
-    setSelectedQuiz(mapApiQuizToForm(quiz));
-    setIsModalVisible(true);
+  const handleEdit = async (quiz: ApiQuiz) => {
+    try {
+      const response = await fetch(
+        `/api/quizzes/getQuizzesById?id=${quiz.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedQuiz(mapApiQuizToForm(data.data)); // Map API data to form structure
+        setIsModalVisible(true);
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to fetch quiz details");
+      }
+    } catch (error) {
+      console.error("Error fetching quiz details:", error);
+      message.error("An error occurred while fetching quiz details");
+    }
   };
   const handlePreview = async (quiz: ApiQuiz) => {
     try {
@@ -178,9 +200,34 @@ const ManageQuizzes = () => {
   };
 
   const handleDuplicate = async (quiz: ApiQuiz) => {
-    const duplicatedQuiz = { ...mapApiQuizToForm(quiz), id: undefined }; // Reset the id to undefined
-    setSelectedQuiz(duplicatedQuiz);
-    setIsModalVisible(true);
+    try {
+      const response = await fetch(
+        `/api/quizzes/getQuizzesById?id=${quiz.id}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const freshQuiz = data.data;
+
+        const duplicatedQuiz = {
+          ...mapApiQuizToForm(freshQuiz),
+          id: undefined,
+        };
+
+        setSelectedQuiz(duplicatedQuiz);
+        setIsModalVisible(true);
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to fetch quiz details");
+      }
+    } catch (error) {
+      console.error("Error duplicating quiz:", error);
+      message.error("An error occurred while duplicating the quiz");
+    }
   };
 
   const columns: ColumnsType<ApiQuiz> = [
@@ -244,7 +291,7 @@ const ManageQuizzes = () => {
       />
 
       <Modal
-        title={selectedQuiz ? "Edit Quiz" : "Create New Quiz"}
+        title={selectedQuiz?.id ? "Edit Quiz" : "Create New Quiz"}
         open={isModalVisible}
         onCancel={() => {
           setIsModalVisible(false);

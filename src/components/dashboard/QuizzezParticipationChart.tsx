@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Card } from "antd";
+import React, { useEffect, useState } from "react";
+import { Card, Spin, Alert } from "antd";
 import {
   XAxis,
   YAxis,
@@ -10,77 +10,103 @@ import {
   BarChart,
   Bar,
   Legend,
+  ResponsiveContainer,
 } from "recharts";
 
-const userData = [
-  { date: "2024-11-18", newUsers: 0 },
-  { date: "2024-11-19", newUsers: 1 },
-  { date: "2024-11-20", newUsers: 0 },
-  { date: "2024-11-21", newUsers: 0 },
-  { date: "2024-11-22", newUsers: 0 },
-  { date: "2024-11-23", newUsers: 0 },
-  { date: "2024-11-24", newUsers: 0 },
-];
+interface TopQuiz {
+  id: number;
+  title: string;
+  participants: number;
+}
 
-const QuizzezParticipationChart = () => {
+const QuizzesParticipationChart = () => {
+  const [quizData, setQuizData] = useState<TopQuiz[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/stats/getStats");
+        if (!response.ok) {
+          throw new Error("Failed to fetch stats");
+        }
+        const data = await response.json();
+        setQuizData(data.data.topQuizzes.slice(0, 5));
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <Alert message="Error" description={error} type="error" showIcon />;
+  }
+
   return (
-    <div
-      style={{
-        padding: "1rem",
-        backgroundColor: "#f9fafb",
-        borderRadius: "12px",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-      }}
-    >
+    <div className="p-4 bg-gray-50 rounded-xl shadow-md">
       <Card
         title="Top 5 Quizzes by Participation"
-        style={{
-          textAlign: "center",
-          fontWeight: "bold",
-          border: "none",
-          backgroundColor: "#ffffff",
-        }}
+        className="text-center font-bold"
       >
-        <BarChart width={500} height={300} data={userData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis
-            dataKey="name"
-            stroke="#374151"
-            label={{ value: "Quiz Name", position: "insideBottom", offset: -5 }}
-          />
-          <YAxis
-            stroke="#374151"
-            label={{
-              value: "Participants",
-              angle: -90,
-              position: "insideLeft",
-            }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "white",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              color: "#374151",
-            }}
-            labelStyle={{ color: "#2563eb" }}
-          />
-          <Legend wrapperStyle={{ bottom: -10 }} />
-          <Bar
-            dataKey="participants"
-            fill="url(#barGradient)"
-            radius={[10, 10, 0, 0]} // Rounded top corners
-          />
-          <defs>
-            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity={0.8} />
-              <stop offset="100%" stopColor="#2563eb" stopOpacity={0.5} />
-            </linearGradient>
-          </defs>
-        </BarChart>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={quizData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis
+              dataKey="title"
+              stroke="#374151"
+              label={{
+                value: "Quiz Name",
+                position: "insideBottom",
+                offset: -5,
+              }}
+            />
+            <YAxis
+              stroke="#374151"
+              label={{
+                value: "Participants",
+                angle: -90,
+                position: "insideLeft",
+              }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
+                color: "#374151",
+              }}
+              labelStyle={{ color: "#2563eb" }}
+            />
+            <Legend wrapperStyle={{ bottom: -10 }} />
+            <Bar
+              dataKey="participants"
+              fill="url(#barGradient)"
+              radius={[10, 10, 0, 0]}
+            />
+            <defs>
+              <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#2563eb" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#2563eb" stopOpacity={0.5} />
+              </linearGradient>
+            </defs>
+          </BarChart>
+        </ResponsiveContainer>
       </Card>
     </div>
   );
 };
 
-export default QuizzezParticipationChart;
+export default QuizzesParticipationChart;

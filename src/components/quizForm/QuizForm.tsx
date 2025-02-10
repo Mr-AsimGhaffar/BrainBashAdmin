@@ -57,79 +57,11 @@ const QuizForm = ({
     });
   }, []);
 
-  const createQuestion = async (questionData: any) => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/questions/createQuestion", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          quizId,
-          question: questionData.question,
-          type: questionData.type,
-          options: questionData.options || [],
-          answer: questionData.correctAnswer || "",
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        message.success("Question added successfully!");
-        return data;
-      } else {
-        message.error(data.message || "Failed to add question.");
-        return null;
-      }
-    } catch (error) {
-      console.error("Error creating question:", error);
-      message.error("An error occurred while adding the question.");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateQuestion = async (questionData: any) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/questions/updateQuestion?id=${questionData?.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            question: questionData.question,
-            type: questionData.type,
-            options: questionData.options || [],
-            answer: questionData.correctAnswer || "",
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        message.success("Question updated successfully!");
-        return data;
-      } else {
-        message.error(data.message || "Failed to update question.");
-        return null;
-      }
-    } catch (error) {
-      console.error("Error updating question:", error);
-      message.error("An error occurred while updating the question.");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteQuestion = async (id: string) => {
+  const deleteQuestion = async (
+    id: string,
+    remove: (index: number) => void,
+    index: number
+  ) => {
     setDeleting(true);
     try {
       const response = await fetch(`/api/questions/deleteQuestion?id=${id}`, {
@@ -141,6 +73,7 @@ const QuizForm = ({
 
       if (response.ok) {
         message.success("Question deleted successfully!");
+        remove(index); // Remove from UI after successful deletion
       } else {
         const data = await response.json();
         message.error(data.message || "Failed to delete question.");
@@ -266,16 +199,6 @@ const QuizForm = ({
         <DatePicker showTime format="DD/MM/YYYY HH:mm:ss" />
       </Form.Item>
 
-      {/* Form Actions */}
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          {initialValues?.id ? "Update Quiz" : "Create Quiz"}
-        </Button>
-        <Button onClick={onCancel} style={{ marginLeft: 8 }}>
-          Cancel
-        </Button>
-      </Form.Item>
-
       {/* Questions Section */}
       <Form.List name="questions">
         {(fields, { add, remove }) => (
@@ -291,6 +214,9 @@ const QuizForm = ({
                 }}
               >
                 <Space direction="vertical" style={{ width: "100%" }}>
+                  <Form.Item name={[name, "id"]} hidden>
+                    <Input />
+                  </Form.Item>
                   <Form.Item
                     {...restField}
                     label="Question"
@@ -308,7 +234,7 @@ const QuizForm = ({
                   <Form.Item
                     {...restField}
                     label="Correct Answer"
-                    name={[name, "correctAnswer"]}
+                    name={[name, "answer"]}
                     rules={[
                       {
                         required: true,
@@ -389,39 +315,20 @@ const QuizForm = ({
                   </Form.Item>
 
                   <Button
-                    type="primary"
-                    onClick={async () => {
-                      const questionData = form.getFieldValue([
-                        "questions",
-                        name,
-                      ]);
-                      if (questionData?.id) {
-                        await updateQuestion(questionData);
-                      } else {
-                        await createQuestion(questionData);
-                      }
-                    }}
-                    loading={loading}
-                    block
-                  >
-                    {form.getFieldValue(["questions", name, "id"])
-                      ? "Update Question"
-                      : "Save Question"}
-                  </Button>
-
-                  <Button
                     onClick={() => {
-                      const questionData = form.getFieldValue([
+                      const questionId = form.getFieldValue([
                         "questions",
                         name,
+                        "id",
                       ]);
-                      if (questionData?.id) {
-                        deleteQuestion(questionData.id);
+                      if (questionId) {
+                        deleteQuestion(questionId, remove, name);
+                      } else {
+                        remove(name); // Remove unsaved question directly
                       }
-                      remove(name);
                     }}
                     danger
-                    loading={deleting}
+                    block
                   >
                     Remove Question
                   </Button>
@@ -435,6 +342,17 @@ const QuizForm = ({
           </>
         )}
       </Form.List>
+      {/* Form Actions */}
+      <Form.Item>
+        <div className="pt-4">
+          <Button type="primary" htmlType="submit">
+            {initialValues?.id ? "Update Quiz" : "Create Quiz"}
+          </Button>
+          <Button onClick={onCancel} style={{ marginLeft: 8 }}>
+            Cancel
+          </Button>
+        </div>
+      </Form.Item>
     </Form>
   );
 };
