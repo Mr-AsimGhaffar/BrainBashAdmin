@@ -6,8 +6,8 @@ import { PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { FaEdit } from "react-icons/fa";
 import { Subject } from "@/lib/definitions";
-import SubjectForm from "@/components/subject/subjectForm";
 import dayjs from "dayjs";
+import SubjectForm from "@/components/subject/SubjectForm";
 
 export default function SubjectPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);

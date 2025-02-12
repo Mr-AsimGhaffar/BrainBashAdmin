@@ -11,7 +11,7 @@ export default async function handler(
       const refreshToken = req.cookies.refreshToken || "";
 
       const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/notifications/`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/achievements/`,
         { method: "GET" },
         { accessToken, refreshToken }
       );
@@ -20,7 +20,7 @@ export default async function handler(
         const apiResponse = await response.json();
         return res.status(200).json({
           ...apiResponse,
-          message: "Successfully fetch notifications",
+          message: "Successfully fetch achievements",
         });
       }
       const errorData = await response.json();

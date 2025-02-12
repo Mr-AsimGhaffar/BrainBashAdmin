@@ -1,11 +1,17 @@
-import React from "react";
+"use client";
 
-const Reports = () => {
+import React from "react";
+import { ReportCard } from "@/components/reports/ReportCard";
+
+const HomePage = () => {
   return (
-    <div>
-      <div>Reports</div>
-    </div>
+    <main className="mx-auto space-y-6">
+      <p className="text-2xl font-semibold">Reports</p>
+      <div>
+        <ReportCard />
+      </div>
+    </main>
   );
 };
 
-export default Reports;
+export default HomePage;

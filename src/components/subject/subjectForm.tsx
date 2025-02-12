@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
-import { Form, Input, Button } from "antd";
+import React, { useEffect, useState } from "react";
+import { Form, Input, Button, message } from "antd";
+import UploadImage from "../upload/UploadImage";
+import ImageUploader from "../upload/UploadImage";
 
 interface SubjectFormProps {
   onSubmit: (values: any) => void;
@@ -13,11 +15,14 @@ export default function SubjectForm({
   initialValues,
 }: SubjectFormProps) {
   const [form] = Form.useForm();
+  const [fileId, setFileId] = useState<number | null>(null);
+
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({
         ...initialValues,
       });
+      setFileId(initialValues.fileId || null);
     } else {
       form.resetFields();
     }
@@ -26,10 +31,14 @@ export default function SubjectForm({
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      onSubmit(values);
+      onSubmit({ ...values, fileId });
     } catch (error) {
       console.error("Validation failed:", error);
     }
+  };
+
+  const handleFileUpload = (uploadedFileId: number) => {
+    setFileId(uploadedFileId); // Update fileId when image is uploaded
   };
 
   return (
@@ -43,7 +52,6 @@ export default function SubjectForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-2 text-center">
           <h1 className="font-medium text-base">
-            {" "}
             {initialValues ? "Edit Subject" : "Add New Subject"}
           </h1>
         </div>
@@ -69,7 +77,12 @@ export default function SubjectForm({
         >
           <Input placeholder="Enter subject name" />
         </Form.Item>
+
+        <Form.Item label="Image Upload">
+          <ImageUploader onFileUpload={handleFileUpload} />
+        </Form.Item>
       </div>
+
       <div className="flex justify-end gap-4 mt-6">
         <Button onClick={onCancel}>Cancel</Button>
         <Button
@@ -77,7 +90,7 @@ export default function SubjectForm({
           onClick={handleSubmit}
           className="font-sansInter"
         >
-          {initialValues ? "Update Subject" : "Add Subject"}
+          {initialValues ? "Update Subject" : "Create Subject"}
         </Button>
       </div>
     </Form>

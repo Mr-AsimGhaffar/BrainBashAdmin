@@ -40,7 +40,9 @@ export default async function handler(
         ];
 
         res.setHeader("Set-Cookie", cookies);
-        return res.status(200).json({ message: "Successfully signed up!" });
+        return res
+          .status(200)
+          .json({ ...data.data, message: "Successfully signed up!" });
       }
 
       const errorData = await response.json();

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Checkbox, message, Spin } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage({
   params: { lang },
@@ -12,12 +12,39 @@ export default function LoginPage({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const redirectUrl = searchParams?.get("redirect") || `/${lang}/index/home`;
   const [loadingForgotPassword, setLoadingForgotPassword] = useState(false);
   const [loadingSignUp, setLoadingSignUp] = useState(false);
 
-  // Updated onFinish handler
+  const extractTokensFromUrl = () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const token = queryParams.get("token");
+    const refreshToken = queryParams.get("refreshToken");
+    const role = queryParams.get("role");
+    const id = queryParams.get("id");
+
+    if (token && refreshToken && role) {
+      document.cookie = `accessToken=${token}; path=/; max-age=${
+        60 * 60 * 24 * 7
+      }`;
+      document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${
+        60 * 60 * 24 * 7
+      }`;
+      document.cookie = `role=${role}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      document.cookie = `id=${id}; path=/; max-age=${60 * 60 * 24 * 7}`;
+
+      // Redirect based on role
+      if (role === "USER") {
+        router.push(`/${lang}/index/quizHome`);
+      } else {
+        router.push(`/${lang}/index/home`);
+      }
+    }
+  };
+
+  useEffect(() => {
+    extractTokensFromUrl();
+  }, [router, lang]);
+
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
@@ -59,6 +86,12 @@ export default function LoginPage({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    setLoading(true);
+    const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google`;
+    window.location.href = googleAuthUrl;
   };
 
   const handleForgotPasswordClick = async () => {
@@ -162,6 +195,8 @@ export default function LoginPage({
                       alt="Google"
                     />
                   }
+                  onClick={handleGoogleLogin}
+                  loading={loading}
                   className="w-full gap-2 border-blue-500 hover:border-blue-600 text-blue-700 text-base font-bold  flex items-center justify-center"
                 >
                   Login with Google

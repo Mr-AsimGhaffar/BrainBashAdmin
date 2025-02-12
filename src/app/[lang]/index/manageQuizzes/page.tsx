@@ -8,6 +8,7 @@ import { Question, Quiz } from "@/lib/definitions";
 import QuizForm from "@/components/quizForm/QuizForm";
 import dayjs from "dayjs";
 import QuizPreviewForm from "@/components/quizForm/QuizPreviewForm";
+import handleExportQuizzes from "@/components/export/ExportQuizzes";
 
 export interface ApiQuiz {
   id: string;
@@ -264,17 +265,22 @@ const ManageQuizzes = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold font-montserra">Manage Quizzes</h1>
-        <Button
-          type="primary"
-          size="large"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            setSelectedQuiz(null);
-            setIsModalVisible(true);
-          }}
-        >
-          Add New Quiz
-        </Button>
+        <div className="flex gap-4">
+          <Button
+            type="primary"
+            size="large"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setSelectedQuiz(null);
+              setIsModalVisible(true);
+            }}
+          >
+            Add New Quiz
+          </Button>
+          <Button size="large" type="primary" onClick={handleExportQuizzes}>
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       <Table

@@ -10,7 +10,7 @@ export default function CreateQuizPage() {
     router.push("/index/manageQuizzes");
   };
   return (
-    <div className="grid grid-cols-2 gap-4 py-44">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-44">
       {/* Left Section */}
       <div className="p-6">
         <h2 className="text-2xl font-bold text-blue-700">

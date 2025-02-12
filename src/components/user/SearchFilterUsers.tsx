@@ -46,40 +46,40 @@ const FilterBar: React.FC<SearchFiltersUsersProps> = ({ onFilterChange }) => {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4">
-        <div>
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6">
+        <div className="w-full lg:w-auto">
           <Input
             placeholder="Search users"
             prefix={<SearchOutlined className="text-blue-500" />}
             value={searchValue}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-80"
+            className="w-full lg:w-80"
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="w-full lg:w-auto">
           <Select
             mode="multiple"
             placeholder="Select Role"
             value={selectedRole}
             onChange={handleRoleChange}
-            style={{ width: 220 }}
+            className="w-full lg:w-56"
             options={menuItemsRole.map((item) => ({
               label: item.label,
               value: item.key,
             }))}
-            className="custom-select"
           />
+        </div>
+        <div className="w-full lg:w-auto">
           <Select
             mode="multiple"
             placeholder="Select Status"
             value={selectedStatus}
             onChange={handleStatusChange}
-            style={{ width: 200 }}
+            className="w-full lg:w-48"
             options={menuItemsStatus.map((item) => ({
               label: item.label,
               value: item.key,
             }))}
-            className="custom-select"
           />
         </div>
       </div>

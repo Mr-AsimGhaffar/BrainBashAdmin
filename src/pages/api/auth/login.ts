@@ -1,4 +1,3 @@
-// login.ts (updated)
 import { NextApiRequest, NextApiResponse } from "next";
 import { serialize } from "cookie";
 

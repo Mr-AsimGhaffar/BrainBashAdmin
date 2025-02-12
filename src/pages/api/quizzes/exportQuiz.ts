@@ -11,24 +11,30 @@ export default async function handler(
       const refreshToken = req.cookies.refreshToken || "";
 
       const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/notifications/`,
-        { method: "GET" },
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/quizzes/export`,
+        {
+          method: "GET",
+        },
         { accessToken, refreshToken }
       );
 
       if (response.ok) {
-        const apiResponse = await response.json();
-        return res.status(200).json({
-          ...apiResponse,
-          message: "Successfully fetch notifications",
-        });
+        const blob = await response.blob();
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader(
+          "Content-Disposition",
+          'attachment; filename="quizzes.csv"'
+        );
+        res.send(Buffer.from(await blob.arrayBuffer()));
+      } else {
+        const errorData = await response.json();
+        return res.status(response.status).json(errorData);
       }
-      const errorData = await response.json();
-      return res.status(response.status).json(errorData);
     } catch (error) {
-      return res.status(500).json([]);
+      return res.status(500).json({ message: "Internal Server Error" });
     }
   }
+
   res.setHeader("Allow", ["GET"]);
   res.status(405).end(`Method ${req.method} Not Allowed`);
 }

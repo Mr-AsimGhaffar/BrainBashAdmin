@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, Button, message, Spin, Select } from "antd";
 import { LockOutlined } from "@ant-design/icons";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import PhoneInput from "react-phone-number-input";
 import { isValidPhoneNumber } from "react-phone-number-input";
 
@@ -14,10 +14,38 @@ export default function SignUpPage({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const redirectUrl = searchParams?.get("redirect") || `/${lang}/auth/login`;
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [phoneValue, setPhoneValue] = useState<string>();
+
+  const extractTokensFromUrl = () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const token = queryParams.get("token");
+    const refreshToken = queryParams.get("refreshToken");
+    const role = queryParams.get("role");
+    const id = queryParams.get("id");
+
+    if (token && refreshToken && role) {
+      document.cookie = `accessToken=${token}; path=/; max-age=${
+        60 * 60 * 24 * 7
+      }`;
+      document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${
+        60 * 60 * 24 * 7
+      }`;
+      document.cookie = `role=${role}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      document.cookie = `id=${id}; path=/; max-age=${60 * 60 * 24 * 7}`;
+
+      // Redirect based on role
+      if (role === "USER") {
+        router.push(`/${lang}/index/quizHome`);
+      } else {
+        router.push(`/${lang}/index/home`);
+      }
+    }
+  };
+
+  useEffect(() => {
+    extractTokensFromUrl();
+  }, [router, lang]);
 
   const onFinish = async (values: any) => {
     setLoading(true);
@@ -33,8 +61,26 @@ export default function SignUpPage({
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        message.success("Successfully signed up!");
+        if (!data.user) {
+          message.error("User data not found in response");
+          return;
+        }
+        if (!data.user.role) {
+          message.error("Role not found in user data");
+          return;
+        }
+
+        const userRole = data.user.role;
+        let redirectUrl = `/${lang}/index/home`;
+
+        if (userRole === "USER") {
+          redirectUrl = `/${lang}/index/quizHome`;
+        }
+
+        message.success("Successfully logged in!");
         router.push(redirectUrl);
       } else {
         const data = await response.json();
@@ -53,6 +99,11 @@ export default function SignUpPage({
       setLoadingLogin(false);
       router.push(`/${lang}/auth/login`);
     }, 2000);
+  };
+
+  const handleGoogleLogin = () => {
+    const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google`;
+    window.location.href = googleAuthUrl;
   };
 
   return (
@@ -178,9 +229,10 @@ export default function SignUpPage({
                       alt="Google"
                     />
                   }
+                  onClick={handleGoogleLogin}
                   className="w-full gap-2 border-blue-500 hover:border-blue-600 text-blue-700 text-base font-bold flex items-center justify-center"
                 >
-                  Login with Google
+                  Sign Up Google
                 </Button>
                 <div className="mt-6 flex items-center justify-center">
                   <p className="text-blue-500">Already have an account ? </p>

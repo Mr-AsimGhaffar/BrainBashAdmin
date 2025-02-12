@@ -85,6 +85,7 @@ export default function NavbarContent({ locale, messages }: Props) {
     { href: `/${locale}/index/quizzesList`, label: "Quizzes List" },
     { href: `/${locale}/index/ideas`, label: "Ideas" },
     { href: `/${locale}/index/manageQuizzes`, label: "Manage Quizzes" },
+    { href: `/${locale}/index/notifications`, label: "Notifications" },
   ];
 
   const adminLinks = [
@@ -95,6 +96,9 @@ export default function NavbarContent({ locale, messages }: Props) {
     { href: `/${locale}/index/settings`, label: "Settings" },
     { href: `/${locale}/index/accessLogs`, label: "Access Logs" },
     { href: `/${locale}/index/manageFeedback`, label: "Manage Feedback" },
+    { href: `/${locale}/index/achievements`, label: "Achievements" },
+    { href: `/${locale}/index/notifications`, label: "Notifications" },
+    { href: `/${locale}/index/reports`, label: "Reports" },
     { href: `/${locale}/index/ideas`, label: "Ideas" },
   ];
 
@@ -252,7 +256,7 @@ export default function NavbarContent({ locale, messages }: Props) {
                   key={link.href}
                   href={link.href}
                   className={clsx(
-                    "px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200 hover:bg-blue-500 hover:rounded-md hover:text-white",
+                    "px-4 py-2 text-sm text-gray-700 hover:bg-blue-400 transition-colors duration-200 hover:rounded-md hover:text-white",
                     {
                       "bg-blue-500 text-white rounded-md": isActive,
                     }

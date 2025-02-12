@@ -10,12 +10,14 @@ export const fetchWithAuth = async (
   }
 
   const makeRequest = async (token: string) => {
+    const isFormData = options.body instanceof FormData; // ✅ Detect FormData
+
     const requestOptions = {
       ...options,
       headers: {
         ...options.headers,
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        ...(isFormData ? {} : { "Content-Type": "application/json" }), // ✅ Don't set Content-Type for FormData
       },
     };
 

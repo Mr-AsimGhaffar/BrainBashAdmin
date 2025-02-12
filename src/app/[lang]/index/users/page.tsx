@@ -18,6 +18,7 @@ import UserForm from "@/components/user/UserForm";
 import FormatString from "@/utils/FormatString";
 import debounce from "lodash.debounce";
 import SearchFilterUsers from "@/components/user/SearchFilterUsers";
+import handleExportUser from "@/components/export/ExportUser";
 
 interface User {
   key: string;
@@ -435,49 +436,23 @@ export default function UserPage() {
     }
   };
 
-  const handleExportCSV = async () => {
-    try {
-      const response = await fetch(`/api/exportUser`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "user_logs.csv";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        message.success("CSV file downloaded successfully!");
-      } else {
-        message.error("Failed to export users.");
-      }
-    } catch (error) {
-      console.error("Error exporting users:", error);
-      message.error("An error occurred while exporting users.");
-    }
-  };
-
   const handleModalCancel = () => {
     setIsModalOpen(false);
   };
 
   return (
     <div>
-      <div className="mb-6 flex items-center gap-6">
+      <div className="mb-6 flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6 rounded-lg">
         <div>
-          <h1 className="text-3xl font-bold font-montserrat">Manage Users</h1>
+          <h1 className="text-xl lg:text-3xl font-bold font-montserrat">
+            Manage Users
+          </h1>
         </div>
-        <div>
+        <div className="w-full lg:w-auto">
           <SearchFilterUsers onFilterChange={handleGeneralSearch} />
         </div>
         <div>
-          <Button type="primary" onClick={handleExportCSV}>
+          <Button type="primary" onClick={handleExportUser}>
             Export CSV
           </Button>
         </div>

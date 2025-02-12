@@ -9,7 +9,6 @@ import { headers } from "next/headers";
 import { Inter, Work_Sans, Montserrat } from "next/font/google";
 
 import "@/app/globals.css";
-import { NotificationProvider } from "@/hooks/context/NotificationContext";
 import { SettingsProvider } from "@/hooks/context/ProjectSettingContext";
 import { QuizSessionProvider } from "@/hooks/context/QuizSessionContext";
 import { WidgetSettingsProvider } from "@/hooks/context/WidgetSettingsContext";
@@ -69,14 +68,12 @@ export default async function Root({ params, children }: Props) {
             <QuizSessionProvider>
               <WidgetSettingsProvider>
                 <SettingsProvider initialSettings={projectSettings}>
-                  <NotificationProvider>
-                    {!isAuthPage && (
-                      <>
-                        <Navbar locale={params.lang} />
-                      </>
-                    )}
-                    {isAuthPage ? children : <Content>{children}</Content>}
-                  </NotificationProvider>
+                  {!isAuthPage && (
+                    <>
+                      <Navbar locale={params.lang} />
+                    </>
+                  )}
+                  {isAuthPage ? children : <Content>{children}</Content>}
                 </SettingsProvider>
               </WidgetSettingsProvider>
             </QuizSessionProvider>

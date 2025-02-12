@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Button, Space, Table, Tag, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { FeedbackActionResponse } from "@/lib/definitions";
-import dayjs from "dayjs";
 import FormatString from "@/utils/FormatString";
+import handleExportFeedback from "@/components/export/ExportFeedback";
 
 export default function AccessLogsPage() {
   const [feedback, setFeedback] = useState<FeedbackActionResponse[]>([]);
@@ -45,39 +45,6 @@ export default function AccessLogsPage() {
   useEffect(() => {
     fetchFeedback();
   }, []);
-
-  const handleExportCSV = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning("Please select feedback to export.");
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/feedback/exportFeedback`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "feedback_logs.csv";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        message.success("CSV file downloaded successfully!");
-      } else {
-        message.error("Failed to export feedbacks.");
-      }
-    } catch (error) {
-      console.error("Error exporting feedbacks:", error);
-      message.error("An error occurred while exporting feedbacks.");
-    }
-  };
 
   const updateStatus = async (id: number, status: string) => {
     try {
@@ -167,20 +134,11 @@ export default function AccessLogsPage() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold font-montserrat mb-6">Feedback</h1>
-        <Button
-          size="large"
-          type="primary"
-          onClick={handleExportCSV}
-          disabled={selectedRowKeys.length === 0}
-        >
+        <Button size="large" type="primary" onClick={handleExportFeedback}>
           Export CSV
         </Button>
       </div>
       <Table
-        rowSelection={{
-          selectedRowKeys,
-          onChange: (keys) => setSelectedRowKeys(keys as number[]),
-        }}
         columns={columns}
         dataSource={feedback}
         loading={loading}

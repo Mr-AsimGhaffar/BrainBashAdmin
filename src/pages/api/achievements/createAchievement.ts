@@ -6,17 +6,20 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { name, fileId } = req.body;
+    const { name, description, criteriaType, criteriaThreshold } = req.body;
 
     try {
       const accessToken = req.cookies.accessToken || "";
       const refreshToken = req.cookies.refreshToken || "";
       const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/subjects/`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/achievements/`,
         {
           method: "POST",
           body: JSON.stringify({
             name,
+            description,
+            criteriaType,
+            criteriaThreshold: Number(criteriaThreshold),
           }),
         },
         { accessToken, refreshToken }
@@ -27,13 +30,13 @@ export default async function handler(
 
         return res.status(200).json({
           data: apiResponse.data,
-          message: "Successfully create subject",
+          message: "Successfully create achievements",
         });
       } else {
         const errorData = await response.json();
-        return res
-          .status(response.status)
-          .json({ message: errorData.message || "Failed to create subject" });
+        return res.status(response.status).json({
+          message: errorData.message || "Failed to create achievements",
+        });
       }
     } catch (error) {
       console.error("Error authenticating:", error);

@@ -101,6 +101,13 @@ export interface Subject {
   id: number;
   name: string;
 }
+export interface Achievement {
+  id: number;
+  name: string;
+  description: string;
+  criteriaType: string;
+  criteriaThreshold: number;
+}
 
 export interface Idea {
   key: string;
@@ -165,16 +172,33 @@ export interface LeaderboardEntry {
   rank: string;
 }
 
+export interface Notification {
+  id: number;
+  userId: number;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Metadata {
+  page: number;
+  hasNextPage: boolean;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  limit: number;
+  total: number;
+}
+
+export interface NotificationsResponse {
+  data: Notification[];
+  metadata: Metadata;
+  message: string;
+}
+
 export type Report = {
   filename: string;
   url: string;
-};
-
-export type TeamMember = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  profileImage: string;
 };
 
 export type Locale = (typeof i18n)["locales"][number];
