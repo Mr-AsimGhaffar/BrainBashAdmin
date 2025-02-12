@@ -9,6 +9,12 @@
   color: #83aff6 !important;
   font-weight: 600;
 }
+
+.PhoneInputInput {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
 .PhoneInputCountry {
   width: 40% !important;
   display: flex;
@@ -20,6 +26,9 @@
   width: 100% !important;
   appearance: none;
   padding-right: 1.5rem;
+  border: none !important;
+  outline: none !important;
+  background: transparent;
 }
 .PhoneInputCountrySelectArrow {
   position: absolute;

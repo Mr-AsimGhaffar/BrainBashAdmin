@@ -5,10 +5,10 @@ import { Button, Table, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { UserActionResponse } from "@/lib/definitions";
 import dayjs from "dayjs";
+import handleExportAccessLog from "@/components/export/ExportAccessLog";
 
 export default function AccessLogsPage() {
   const [accessLogs, setAccessLogs] = useState<UserActionResponse[]>([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchAccessLogs = async () => {
@@ -45,39 +45,6 @@ export default function AccessLogsPage() {
     fetchAccessLogs();
   }, []);
 
-  const handleExportCSV = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning("Please select logs to export.");
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/accessLogs/exportAccessLogs`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "access_logs.csv";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        message.success("CSV file downloaded successfully!");
-      } else {
-        message.error("Failed to export logs.");
-      }
-    } catch (error) {
-      console.error("Error exporting logs:", error);
-      message.error("An error occurred while exporting logs.");
-    }
-  };
-
   const columns: ColumnsType<UserActionResponse> = [
     {
       title: <span className="flex items-center gap-2">ID</span>,
@@ -112,21 +79,12 @@ export default function AccessLogsPage() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold font-montserrat mb-6">Access Logs</h1>
-        <Button
-          size="large"
-          type="primary"
-          onClick={handleExportCSV}
-          disabled={selectedRowKeys.length === 0}
-        >
+        <Button size="large" type="primary" onClick={handleExportAccessLog}>
           Export CSV
         </Button>
       </div>
 
       <Table
-        rowSelection={{
-          selectedRowKeys,
-          onChange: (keys) => setSelectedRowKeys(keys as number[]),
-        }}
         columns={columns}
         dataSource={accessLogs}
         loading={loading}

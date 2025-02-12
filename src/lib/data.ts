@@ -1,4 +1,4 @@
-import { User, Report, ProjectSettings } from "@/lib/definitions";
+import { User, ProjectSettings } from "@/lib/definitions";
 import { fetchWithAuth } from "@/pages/api/refreshToken/refreshAccessToken";
 import { cookies } from "next/headers";
 
@@ -65,12 +65,4 @@ export async function getProjectSettings(): Promise<ProjectSettings | null> {
     console.error("Error fetching project settings data:", error);
     throw error;
   }
-}
-
-export async function getReports(): Promise<Report[]> {
-  return new Promise((resolve) => {
-    const reports: Report[] = [];
-
-    setTimeout(() => resolve(reports), 500);
-  });
 }

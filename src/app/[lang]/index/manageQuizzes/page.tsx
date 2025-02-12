@@ -12,6 +12,7 @@ import handleExportQuizzes from "@/components/export/ExportQuizzes";
 
 export interface ApiQuiz {
   id: string;
+  fileId: number;
   title: string;
   description?: string;
   category: string;
@@ -71,6 +72,7 @@ const ManageQuizzes = () => {
     try {
       const payload = {
         ...values,
+        fileId: values.fileId,
         subjectId: values.category,
         publishDate: values.publishDate.toISOString(),
         expiryDate: values.expiryDate.toISOString(),
@@ -101,6 +103,7 @@ const ManageQuizzes = () => {
     try {
       const payload = {
         ...values,
+        fileId: values.fileId,
         publishDate: values.publishDate.toISOString(),
         expiryDate: values.expiryDate.toISOString(),
         maxScore: Number(values.maxScore),
@@ -290,6 +293,7 @@ const ManageQuizzes = () => {
         rowKey="id"
         bordered
         pagination={{ pageSize: 10 }}
+        scroll={{ x: "max-content" }}
       />
       <QuizPreviewForm
         quiz={previewQuiz}

@@ -5,7 +5,7 @@ import { CarouselRef } from "antd/es/carousel";
 import { useRef, useEffect, useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
-export default function Home() {
+export default function QuizHome() {
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const carouselRef = useRef<CarouselRef>(null);
 
@@ -54,7 +54,7 @@ export default function Home() {
                 <QuizCard
                   id={quiz.id.toString()}
                   title={quiz.title}
-                  image={quiz.image || "/images/chemistry.png"} // Fallback to default image if none available
+                  image={quiz.image || "/images/NoImage.png"}
                 />
               </div>
             ))}

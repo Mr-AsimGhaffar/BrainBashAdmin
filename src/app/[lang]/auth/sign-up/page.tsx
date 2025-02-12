@@ -181,19 +181,11 @@ export default function SignUpPage({
                 >
                   <PhoneInput
                     international
-                    defaultCountry="US"
+                    defaultCountry="PK"
                     value={phoneValue}
                     onChange={setPhoneValue}
-                    className="border border-blue-500 text-blue-500 rounded-md pl-2 flex items-center gap-4 h-12"
-                    flagComponent={({ country }) => (
-                      <div></div>
-                      // <img
-                      //   src={`https://flagcdn.com/w20/${country.toLowerCase()}.png`}
-                      //   alt={country}
-                      //   className="w-5 h-4 object-cover ml-2"
-                      //   loading="lazy"
-                      // />
-                    )}
+                    className="border border-blue-500 rounded-md pl-2 flex items-center gap-4 h-12 bg-white text-base"
+                    flagComponent={({ country }) => <div></div>}
                   />
                 </Form.Item>
 

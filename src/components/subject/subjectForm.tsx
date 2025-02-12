@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, message } from "antd";
-import UploadImage from "../upload/UploadImage";
 import ImageUploader from "../upload/UploadImage";
 
 interface SubjectFormProps {
@@ -38,7 +37,7 @@ export default function SubjectForm({
   };
 
   const handleFileUpload = (uploadedFileId: number) => {
-    setFileId(uploadedFileId); // Update fileId when image is uploaded
+    setFileId(uploadedFileId);
   };
 
   return (

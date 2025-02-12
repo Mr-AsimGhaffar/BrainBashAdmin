@@ -9,7 +9,6 @@ import handleExportFeedback from "@/components/export/ExportFeedback";
 
 export default function AccessLogsPage() {
   const [feedback, setFeedback] = useState<FeedbackActionResponse[]>([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchFeedback = async () => {

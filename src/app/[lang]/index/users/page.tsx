@@ -56,7 +56,6 @@ export default function UserPage() {
   >([]);
 
   const [search, setSearch] = useState("");
-  const [searchField, setSearchField] = useState("");
 
   const fetchUsers = async (currentFilters = filters) => {
     setLoading(true);
@@ -358,9 +357,9 @@ export default function UserPage() {
   ];
 
   // Handle edit button click
-  const handleEdit = async (company: User) => {
+  const handleEdit = async (user: User) => {
     try {
-      const response = await fetch(`/api/getUserById?id=${company.id}`, {
+      const response = await fetch(`/api/getUserById?id=${user.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

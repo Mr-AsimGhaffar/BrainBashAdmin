@@ -16,7 +16,7 @@ export default function QuizListPage() {
       const formattedData = data.map((quiz: any) => ({
         id: quiz.id,
         title: quiz.title,
-        image: "/images/chemistry.png", // Assuming a default image, can be updated based on API response
+        image: quiz.image,
       }));
       setQuizzes(formattedData);
     } catch (error) {
@@ -46,7 +46,7 @@ export default function QuizListPage() {
             key={index}
             id={quiz.id}
             title={quiz.title}
-            image={quiz.image}
+            image={quiz.image || "/images/NoImage.png"}
           />
         ))}
       </div>

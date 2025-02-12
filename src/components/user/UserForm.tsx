@@ -104,7 +104,7 @@ export default function UserForm({
               setPhoneValue(value);
               form.setFieldsValue({ phoneNumber: value }); // Keep form and state in sync
             }}
-            className="border rounded-md pl-2 flex items-center h-8"
+            className="border rounded-md pl-2 flex items-center h-8 bg-white"
             flagComponent={({ country }) => <div></div>}
           />
         </Form.Item>

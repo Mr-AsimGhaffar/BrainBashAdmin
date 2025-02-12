@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Form, Input, Select, DatePicker, Button, Space, message } from "antd";
 import type { FormInstance } from "antd";
 import { Quiz } from "@/lib/definitions";
+import ImageUploader from "../upload/UploadImage";
 
 interface Subject {
   id: number;
@@ -35,6 +36,7 @@ const QuizForm = ({
   const [questionTypes, setQuestionTypes] = useState([]);
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fileId, setFileId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchQuestionTypes = async () => {
@@ -122,8 +124,13 @@ const QuizForm = ({
         publishDate: initialValues.publishDate,
         expiryDate: initialValues.expiryDate,
       });
+      setFileId(initialValues.fileId || null);
     }
   }, [initialValues, form]);
+
+  const handleFileUpload = (uploadedFileId: number) => {
+    setFileId(uploadedFileId); // Update fileId when image is uploaded
+  };
 
   return (
     <Form form={form} onFinish={onFinish} layout="vertical">
@@ -197,6 +204,9 @@ const QuizForm = ({
         rules={[{ required: true, message: "Please select an expiry date!" }]}
       >
         <DatePicker showTime format="DD/MM/YYYY HH:mm:ss" />
+      </Form.Item>
+      <Form.Item label="Image Upload">
+        <ImageUploader onFileUpload={handleFileUpload} />
       </Form.Item>
 
       {/* Questions Section */}

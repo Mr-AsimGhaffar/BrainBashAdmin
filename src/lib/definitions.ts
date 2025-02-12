@@ -77,6 +77,7 @@ import { Dayjs } from "dayjs";
 
 export interface Quiz {
   id?: string;
+  fileId: number;
   title: string;
   description?: string;
   category: string;
@@ -195,10 +196,5 @@ export interface NotificationsResponse {
   metadata: Metadata;
   message: string;
 }
-
-export type Report = {
-  filename: string;
-  url: string;
-};
 
 export type Locale = (typeof i18n)["locales"][number];

@@ -11,7 +11,6 @@ export default function CreateQuizPage() {
   };
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-44">
-      {/* Left Section */}
       <div className="p-6">
         <h2 className="text-2xl font-bold text-blue-700">
           How to Create Quizz
@@ -36,8 +35,6 @@ export default function CreateQuizPage() {
           Create Quizz
         </Button>
       </div>
-
-      {/* Right Section */}
       <Card className="border border-blue-500 rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold text-blue-700">How to Play Quizz</h2>
         <p className="text-gray-600 mt-2">
@@ -45,9 +42,6 @@ export default function CreateQuizPage() {
           challenging way, expanding general knowledge and encouraging critical
           thinking.
         </p>
-        <Button className="mt-4 bg-yellow-400 border-none text-white">
-          Play Quizz
-        </Button>
       </Card>
     </div>
   );
