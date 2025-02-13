@@ -22,6 +22,9 @@ export interface ApiQuiz {
   expiryDate: string;
   subjectId: number;
   questions: Question[];
+  File: {
+    id: number;
+  };
 }
 
 const ManageQuizzes = () => {
@@ -85,6 +88,7 @@ const ManageQuizzes = () => {
           answer: q.answer,
         })),
       };
+      console.log("payload", payload);
       const response = await fetch("/api/quizzes/createQuize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

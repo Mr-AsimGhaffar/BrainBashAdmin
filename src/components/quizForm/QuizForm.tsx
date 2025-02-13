@@ -37,6 +37,30 @@ const QuizForm = ({
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fileId, setFileId] = useState<number | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  const fetchFileById = async (id: number) => {
+    try {
+      const response = await fetch(`/api/files/getFileById?id=${id}`, {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        // Handle the response as a blob (binary data)
+        const blob = await response.blob();
+
+        // Create a URL for the blob object
+        const fileUrl = URL.createObjectURL(blob);
+
+        // Set the image URL to display the file
+        setImageUrl(fileUrl);
+      } else {
+        console.error("Failed to fetch file");
+      }
+    } catch (error) {
+      console.error("Error fetching file:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchQuestionTypes = async () => {
@@ -124,7 +148,11 @@ const QuizForm = ({
         publishDate: initialValues.publishDate,
         expiryDate: initialValues.expiryDate,
       });
-      setFileId(initialValues.fileId || null);
+      setFileId(initialValues?.fileId || null);
+      // Fetch the image URL if fileId exists
+      if (initialValues?.File?.id) {
+        fetchFileById(initialValues?.File?.id);
+      }
     }
   }, [initialValues, form]);
 
@@ -133,7 +161,14 @@ const QuizForm = ({
   };
 
   return (
-    <Form form={form} onFinish={onFinish} layout="vertical">
+    <Form
+      form={form}
+      onFinish={(values) => {
+        values.fileId = fileId;
+        onFinish(values);
+      }}
+      layout="vertical"
+    >
       {/* Title */}
       <Form.Item
         label="Title"
@@ -207,6 +242,16 @@ const QuizForm = ({
       </Form.Item>
       <Form.Item label="Image Upload">
         <ImageUploader onFileUpload={handleFileUpload} />
+        {/* Display the image if imageUrl exists */}
+        {imageUrl && (
+          <div className="mt-2">
+            <img
+              src={imageUrl}
+              alt="Uploaded"
+              className="w-32 h-32 object-cover"
+            />
+          </div>
+        )}
       </Form.Item>
 
       {/* Questions Section */}

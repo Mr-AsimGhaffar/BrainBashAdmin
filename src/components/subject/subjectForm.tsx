@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, Button } from "antd";
 import ImageUploader from "../upload/UploadImage";
 
 interface SubjectFormProps {
@@ -15,17 +15,46 @@ export default function SubjectForm({
 }: SubjectFormProps) {
   const [form] = Form.useForm();
   const [fileId, setFileId] = useState<number | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({
         ...initialValues,
       });
-      setFileId(initialValues.fileId || null);
+      setFileId(initialValues?.fileId || null);
+      // Fetch the image URL if fileId exists
+      if (initialValues?.File?.id) {
+        fetchFileById(initialValues?.File?.id);
+      }
     } else {
       form.resetFields();
+      setImageUrl(null); // Reset image URL when no initialValues
     }
   }, [initialValues, form]);
+
+  const fetchFileById = async (id: number) => {
+    try {
+      const response = await fetch(`/api/files/getFileById?id=${id}`, {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        // Handle the response as a blob (binary data)
+        const blob = await response.blob();
+
+        // Create a URL for the blob object
+        const fileUrl = URL.createObjectURL(blob);
+
+        // Set the image URL to display the file
+        setImageUrl(fileUrl);
+      } else {
+        console.error("Failed to fetch file");
+      }
+    } catch (error) {
+      console.error("Error fetching file:", error);
+    }
+  };
 
   const handleSubmit = async () => {
     try {
@@ -79,6 +108,16 @@ export default function SubjectForm({
 
         <Form.Item label="Image Upload">
           <ImageUploader onFileUpload={handleFileUpload} />
+          {/* Display the image if imageUrl exists */}
+          {imageUrl && (
+            <div className="mt-2">
+              <img
+                src={imageUrl}
+                alt="Uploaded"
+                className="w-32 h-32 object-cover"
+              />
+            </div>
+          )}
         </Form.Item>
       </div>
 

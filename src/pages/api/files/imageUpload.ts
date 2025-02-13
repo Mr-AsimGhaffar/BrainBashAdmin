@@ -38,11 +38,10 @@ export default async function handler(
         "file",
         new Blob([fileBuffer], { type: "application/pdf" }),
         file?.originalFilename
-      ); // ✅ Set MIME Type
-
-      // ✅ Send to Express backend
+      );
+      console.log(process.env.NEXT_PUBLIC_API_BASE_URL);
       const response = await fetchWithAuth(
-        "https://aaee-39-43-147-123.ngrok-free.app/api/v1/files",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/files`,
         {
           method: "POST",
           body: formData,

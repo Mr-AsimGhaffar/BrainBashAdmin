@@ -87,6 +87,9 @@ export interface Quiz {
   expiryDate: Dayjs;
   subjectId: number;
   questions: Question[];
+  File: {
+    id: number;
+  };
 }
 
 export interface Question {

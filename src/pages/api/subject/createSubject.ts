@@ -17,6 +17,7 @@ export default async function handler(
           method: "POST",
           body: JSON.stringify({
             name,
+            fileId,
           }),
         },
         { accessToken, refreshToken }

@@ -54,7 +54,11 @@ export default function QuizHome() {
                 <QuizCard
                   id={quiz.id.toString()}
                   title={quiz.title}
-                  image={quiz.image || "/images/NoImage.png"}
+                  image={
+                    quiz?.file?.base64Content
+                      ? `data:image/png;base64,${quiz.file.base64Content}`
+                      : "/images/NoImage.png"
+                  }
                 />
               </div>
             ))}

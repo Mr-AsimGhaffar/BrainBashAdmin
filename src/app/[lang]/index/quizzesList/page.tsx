@@ -13,12 +13,7 @@ export default function QuizListPage() {
       const response = await fetch("/api/quizzes/getQuizzes");
       if (!response.ok) throw new Error("Failed to fetch quizzes");
       const { data } = await response.json();
-      const formattedData = data.map((quiz: any) => ({
-        id: quiz.id,
-        title: quiz.title,
-        image: quiz.image,
-      }));
-      setQuizzes(formattedData);
+      setQuizzes(data);
     } catch (error) {
       message.error("Failed to fetch quizzes");
     }
@@ -41,12 +36,16 @@ export default function QuizListPage() {
         </div>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {quizzes.map((quiz, index) => (
+        {quizzes.map((quiz: any, index: number) => (
           <QuizCard
             key={index}
-            id={quiz.id}
+            id={quiz.id.toString()}
             title={quiz.title}
-            image={quiz.image || "/images/NoImage.png"}
+            image={
+              quiz?.file?.base64Content
+                ? `data:image/png;base64,${quiz.file.base64Content}`
+                : "/images/NoImage.png"
+            }
           />
         ))}
       </div>
