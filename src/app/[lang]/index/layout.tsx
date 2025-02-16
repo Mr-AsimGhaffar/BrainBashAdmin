@@ -12,6 +12,7 @@ import "@/app/globals.css";
 import { SettingsProvider } from "@/hooks/context/ProjectSettingContext";
 import { QuizSessionProvider } from "@/hooks/context/QuizSessionContext";
 import { WidgetSettingsProvider } from "@/hooks/context/WidgetSettingsContext";
+import Footer from "@/components/Footer";
 
 export async function generateMetadata() {
   const projectSettings = await getProjectSettings();
@@ -74,6 +75,7 @@ export default async function Root({ params, children }: Props) {
                     </>
                   )}
                   {isAuthPage ? children : <Content>{children}</Content>}
+                  {!isAuthPage && <>{user?.role === "USER" && <Footer />}</>}
                 </SettingsProvider>
               </WidgetSettingsProvider>
             </QuizSessionProvider>

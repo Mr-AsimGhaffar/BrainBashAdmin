@@ -8,6 +8,9 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { id } = req.query;
+      if (!id) {
+        return res.status(400).json({ message: "Quiz ID is required" });
+      }
       const accessToken = req.cookies.accessToken || "";
       const refreshToken = req.cookies.refreshToken || "";
 

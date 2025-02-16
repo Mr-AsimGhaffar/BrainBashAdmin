@@ -9,6 +9,7 @@ import QuizForm from "@/components/quizForm/QuizForm";
 import dayjs from "dayjs";
 import QuizPreviewForm from "@/components/quizForm/QuizPreviewForm";
 import handleExportQuizzes from "@/components/export/ExportQuizzes";
+import QuizReportForm from "@/components/quizForm/QuizReportForm";
 
 export interface ApiQuiz {
   id: string;
@@ -21,6 +22,8 @@ export interface ApiQuiz {
   publishDate: string;
   expiryDate: string;
   subjectId: number;
+  totalParticipants: number;
+  averageScore: number;
   questions: Question[];
   File: {
     id: number;
@@ -30,6 +33,7 @@ export interface ApiQuiz {
 const ManageQuizzes = () => {
   const [quizzes, setQuizzes] = useState<ApiQuiz[]>([]);
   const [previewQuiz, setPreviewQuiz] = useState<ApiQuiz | null>(null);
+  const [reportQuiz, setReportQuiz] = useState<ApiQuiz | null>(null);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
@@ -88,7 +92,6 @@ const ManageQuizzes = () => {
           answer: q.answer,
         })),
       };
-      console.log("payload", payload);
       const response = await fetch("/api/quizzes/createQuize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -238,6 +241,31 @@ const ManageQuizzes = () => {
     }
   };
 
+  const handleGetQuizReport = async (quiz: ApiQuiz) => {
+    try {
+      const response = await fetch(
+        `/api/quizzes/getQuizReports?id=${quiz.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setReportQuiz(data.data);
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to fetch quizzes reports data");
+      }
+    } catch (error) {
+      console.error("Error fetching quizzes report data:", error);
+      message.error("An error occurred while fetching quizzes reports data");
+    }
+  };
+
   const columns: ColumnsType<ApiQuiz> = [
     { title: "ID", dataIndex: "id", key: "id" },
     { title: "Title", dataIndex: "title", key: "title" },
@@ -255,6 +283,7 @@ const ManageQuizzes = () => {
           <Button onClick={() => handleDuplicate(record)}>Duplicate</Button>
           <Button onClick={() => handleEdit(record)}>Edit</Button>
           <Button onClick={() => handlePreview(record)}>Preview</Button>
+          <Button onClick={() => handleGetQuizReport(record)}>Report</Button>
           <Popconfirm
             title="Are you sure to delete this quiz?"
             onConfirm={() => handleDelete(record.id)}
@@ -303,6 +332,7 @@ const ManageQuizzes = () => {
         quiz={previewQuiz}
         onClose={() => setPreviewQuiz(null)}
       />
+      <QuizReportForm quiz={reportQuiz} onClose={() => setReportQuiz(null)} />
 
       <Modal
         title={selectedQuiz?.id ? "Edit Quiz" : "Create New Quiz"}

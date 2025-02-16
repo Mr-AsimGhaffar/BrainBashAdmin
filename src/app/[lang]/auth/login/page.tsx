@@ -196,7 +196,6 @@ export default function LoginPage({
                     />
                   }
                   onClick={handleGoogleLogin}
-                  loading={loading}
                   className="w-full gap-2 border-blue-500 hover:border-blue-600 text-blue-700 text-base font-bold  flex items-center justify-center"
                 >
                   Login with Google

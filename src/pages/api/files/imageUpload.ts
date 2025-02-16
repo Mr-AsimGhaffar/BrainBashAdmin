@@ -39,7 +39,6 @@ export default async function handler(
         new Blob([fileBuffer], { type: "application/pdf" }),
         file?.originalFilename
       );
-      console.log(process.env.NEXT_PUBLIC_API_BASE_URL);
       const response = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/files`,
         {
@@ -51,7 +50,6 @@ export default async function handler(
 
       if (response.ok) {
         const apiResponse = await response.json();
-        console.log("data", apiResponse);
         return res.status(200).json({
           ...apiResponse,
           message: "Successfully uploaded file",

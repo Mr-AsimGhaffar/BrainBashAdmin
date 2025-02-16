@@ -5,5 +5,7 @@ interface Props {
 }
 
 export default function Content({ children }: Props) {
-  return <div className="w-full p-4 lg:px-44 lg:py-12">{children}</div>;
+  return (
+    <div className="w-full p-4 lg:px-44 lg:py-12 min-h-screen">{children}</div>
+  );
 }
