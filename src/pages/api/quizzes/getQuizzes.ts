@@ -9,9 +9,10 @@ export default async function handler(
     try {
       const accessToken = req.cookies.accessToken || "";
       const refreshToken = req.cookies.refreshToken || "";
+      const { page = 1, limit = 10 } = req.query;
 
       const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/quizzes/`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/quizzes?page=${page}&limit=${limit}`,
         { method: "GET" },
         { accessToken, refreshToken }
       );
@@ -19,7 +20,8 @@ export default async function handler(
       if (response.ok) {
         const apiResponse = await response.json();
         return res.status(200).json({
-          ...apiResponse,
+          quizzes: apiResponse.data,
+          pagination: apiResponse.metadata,
           message: "Successfully fetch quizzes",
         });
       }

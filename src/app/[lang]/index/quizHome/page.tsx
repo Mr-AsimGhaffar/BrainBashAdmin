@@ -13,8 +13,8 @@ export default function QuizHome() {
     try {
       const response = await fetch("/api/quizzes/getQuizzes");
       if (!response.ok) throw new Error("Failed to fetch quizzes");
-      const { data } = await response.json();
-      setQuizzes(data);
+      const { quizzes } = await response.json();
+      setQuizzes(quizzes);
     } catch (error) {
       console.error("Failed to fetch quizzes", error);
     }

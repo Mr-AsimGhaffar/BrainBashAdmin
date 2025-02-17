@@ -54,8 +54,8 @@ const ManageQuizzes = () => {
     try {
       const response = await fetch("/api/quizzes/getQuizzes");
       if (!response.ok) throw new Error("Failed to fetch quizzes");
-      const { data } = await response.json();
-      const formattedData = data.map((quiz: any) => ({
+      const { quizzes } = await response.json();
+      const formattedData = quizzes.map((quiz: any) => ({
         id: quiz.id,
         title: quiz.title,
         description: quiz.description,
