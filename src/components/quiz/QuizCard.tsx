@@ -6,13 +6,14 @@ interface QuizCardProps {
   id: string;
   title: string;
   image: string;
+  lang: string;
 }
 
-export default function QuizCard({ id, title, image }: QuizCardProps) {
+export default function QuizCard({ id, title, image, lang }: QuizCardProps) {
   const router = useRouter();
 
   const handleQuizClick = () => {
-    router.push(`/index/quizzesList/${id}`);
+    router.push(`${lang}/index/quizzesList/${id}`);
   };
 
   return (

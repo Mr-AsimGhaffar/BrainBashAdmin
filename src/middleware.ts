@@ -12,72 +12,35 @@ function getLocale(request: NextRequest): string | undefined {
   let languages = new Negotiator({ headers: negotiatorHeaders }).languages(
     locales
   );
-  const locale = matchLocale(languages, locales, i18n.defaultLocale);
-  return locale;
+  return matchLocale(languages, locales, i18n.defaultLocale);
 }
 
 export function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
+  const { pathname, searchParams } = request.nextUrl;
   const headers = new Headers(request.headers);
-  headers.set("x-current-path", request.nextUrl.pathname);
+  headers.set("x-current-path", pathname);
   const isRootPath = pathname === "/";
   const locale = getLocale(request);
+  const hasValidToken = request.cookies.has("accessToken");
 
-  // Check if pathname is missing locale
-  const pathnameIsMissingLocale = i18n.locales.every(
-    (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
-  );
-
-  // Redirect if locale is missing
-  if (pathnameIsMissingLocale) {
-    const sanitizedPathname = pathname.startsWith("/")
-      ? pathname.substring(1)
-      : pathname;
-    return NextResponse.redirect(
-      new URL(`/${locale}/${sanitizedPathname || "auth/login"}`, request.url)
-    );
-  }
+  const publicRoutes = [
+    `/${locale}/index/quizHome`,
+    `/${locale}/index/createQuiz`,
+    `/${locale}/index/quizzesList`,
+    `/${locale}/auth/login`,
+    `/${locale}/auth/sign-up`,
+  ];
 
   if (isRootPath) {
-    return NextResponse.redirect(new URL(`/${locale}/auth/login`, request.url));
+    return NextResponse.redirect(
+      new URL(`/${locale}/index/quizHome`, request.url)
+    );
   }
 
-  // Authentication checks
-  const pathParts = pathname.split("/");
-  const localePart = pathParts[1];
-  const routeSegment = pathParts[2];
-
-  const isProtectedRoute = routeSegment === "index";
-  const isAuthRoute = routeSegment === "auth";
-  const hasValidToken = request.cookies.has("accessToken");
-  const role = request.cookies.get("role")?.value;
-
-  // Handle protected routes
-  if (isProtectedRoute && !hasValidToken) {
-    const loginUrl = new URL(`/${localePart}/auth/login`, request.url);
+  if (!hasValidToken && !publicRoutes.includes(pathname)) {
+    const loginUrl = new URL(`/${locale}/auth/login`, request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
-  }
-
-  // Role-based redirection logic
-  if (hasValidToken && isAuthRoute) {
-    if (role === "USER") {
-      return NextResponse.redirect(
-        new URL(`/${localePart}/index/quizHome`, request.url)
-      );
-    }
-    if (role === "ADMIN" || role === "SUPER_ADMIN") {
-      return NextResponse.redirect(
-        new URL(`/${localePart}/index/home`, request.url)
-      );
-    }
-  }
-
-  // Prevent authenticated users from accessing auth routes
-  if (isAuthRoute && hasValidToken) {
-    return NextResponse.redirect(
-      new URL(`/${localePart}/index/home`, request.url)
-    );
   }
 
   return NextResponse.next({ headers });

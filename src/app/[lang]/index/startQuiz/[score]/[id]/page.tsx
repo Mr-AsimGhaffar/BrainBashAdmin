@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import CryptoJS from "crypto-js";
 
-const EndQuizPage = () => {
+const EndQuizPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const params = useParams<{ score: string; id: string }>();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [activeTab, setActiveTab] = useState("Score");
@@ -33,7 +33,7 @@ const EndQuizPage = () => {
   }
 
   const handlePlayAgain = () => {
-    window.location.href = "/index/quizzesList";
+    window.location.href = `/${lang}/index/quizzesList`;
   };
 
   useEffect(() => {

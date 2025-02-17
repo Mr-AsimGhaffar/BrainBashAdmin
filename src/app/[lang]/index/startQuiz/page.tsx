@@ -8,7 +8,7 @@ import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import FormatTime from "@/utils/FormatTime";
 
-const StartQuizPage = () => {
+const StartQuizPage = ({ params: { lang } }: { params: { lang: string } }) => {
   const { quizSession } = useQuizSession();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -93,7 +93,7 @@ const StartQuizPage = () => {
         setTimeExpired(false);
         setLoading(false);
       } else {
-        window.location.href = `/index/startQuiz/${encodeURIComponent(
+        window.location.href = `/${lang}/index/startQuiz/${encodeURIComponent(
           encryptedScore
         )}/${quizId}`;
       }

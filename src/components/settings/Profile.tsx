@@ -5,13 +5,14 @@ import { Form, Input, Button, Card, message } from "antd";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/hooks/context/ProjectSettingContext";
 
-export default function Profile() {
+export default function Profile({ params }: { params?: { lang: string } }) {
   const router = useRouter();
   const [form] = Form.useForm();
   const { settings, setSettings } = useSettings();
 
   const backToDashboard = () => {
-    router.push(`/index/home`);
+    const lang = params?.lang || "en";
+    router.push(`/${lang}/index/home`);
   };
 
   const onFinish = async (values: any) => {

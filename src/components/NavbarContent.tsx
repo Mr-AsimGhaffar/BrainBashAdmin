@@ -18,6 +18,7 @@ interface Props {
 
 export default function NavbarContent({ locale, messages }: Props) {
   const { user } = useUser();
+  const isAuthenticated = !!user;
   const role = user?.role || "";
   const { settings } = useSettings();
   const router = useRouter();
@@ -58,7 +59,7 @@ export default function NavbarContent({ locale, messages }: Props) {
       });
 
       if (response.ok) {
-        router.push(`/auth/login`);
+        router.push(`/${locale}/auth/login`);
       } else {
         console.error("Failed to log out");
       }
@@ -78,6 +79,12 @@ export default function NavbarContent({ locale, messages }: Props) {
   useOutsideClick(userMenuRef, () => {
     setUserMenuOpen(false);
   });
+
+  const publicLinks = [
+    { href: `/${locale}/index/quizHome`, label: "Quiz Home" },
+    { href: `/${locale}/index/createQuiz`, label: "Create Quiz" },
+    { href: `/${locale}/index/quizzesList`, label: "Quizzes List" },
+  ];
 
   const userLinks = [
     { href: `/${locale}/index/quizHome`, label: "Quiz Home" },
@@ -102,8 +109,11 @@ export default function NavbarContent({ locale, messages }: Props) {
     { href: `/${locale}/index/ideas`, label: "Ideas" },
   ];
 
-  const navLinks =
-    role === "ADMIN" || role === "SUPER_ADMIN" ? adminLinks : userLinks;
+  const navLinks = isAuthenticated
+    ? user?.role === "ADMIN" || user?.role === "SUPER_ADMIN"
+      ? adminLinks
+      : userLinks
+    : publicLinks;
 
   return (
     <IntlProvider locale={locale} messages={messages}>
@@ -195,39 +205,58 @@ export default function NavbarContent({ locale, messages }: Props) {
             </button>
 
             {/* User Profile Icon */}
-            <div className="relative">
-              <button
-                type="button"
-                className="rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-600"
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-              >
-                <Image
-                  src="/images/navbarAvatar.png"
-                  alt="Profile image"
-                  className="rounded-full object-cover"
-                  width={36}
-                  height={36}
-                />
-              </button>
-
-              {userMenuOpen && (
-                <Menu ref={userMenuRef}>
-                  <MenuItem href="">
-                    <p className="font-semibold text-gray-800">
-                      {user?.username
-                        ? user.username.charAt(0).toUpperCase() +
-                          user.username.slice(1)
-                        : "Guest"}
-                    </p>
-                  </MenuItem>
-
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
+            <div className="flex items-center gap-4">
+              {!isAuthenticated ? (
+                <>
+                  <Link
+                    href={`/${locale}/auth/login`}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md"
                   >
-                    <FormattedMessage id="common.user-menu.sign-out" />
+                    Login
+                  </Link>
+                  <Link
+                    href={`/${locale}/auth/sign-up`}
+                    className="px-4 py-2 bg-green-500 text-white rounded-md"
+                  >
+                    Signup
+                  </Link>
+                </>
+              ) : (
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-600"
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  >
+                    <Image
+                      src="/images/navbarAvatar.png"
+                      alt="Profile image"
+                      className="rounded-full object-cover"
+                      width={36}
+                      height={36}
+                    />
                   </button>
-                </Menu>
+
+                  {userMenuOpen && (
+                    <Menu ref={userMenuRef}>
+                      <MenuItem href="">
+                        <p className="font-semibold text-gray-800">
+                          {user?.username
+                            ? user.username.charAt(0).toUpperCase() +
+                              user.username.slice(1)
+                            : "Guest"}
+                        </p>
+                      </MenuItem>
+
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
+                      >
+                        <FormattedMessage id="common.user-menu.sign-out" />
+                      </button>
+                    </Menu>
+                  )}
+                </div>
               )}
             </div>
           </div>

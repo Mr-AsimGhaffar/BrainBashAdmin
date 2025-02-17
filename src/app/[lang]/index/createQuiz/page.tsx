@@ -3,11 +3,15 @@
 import { Button, Card } from "antd";
 import { useRouter } from "next/navigation";
 
-export default function CreateQuizPage() {
+export default function CreateQuizPage({
+  params: { lang },
+}: {
+  params: { lang: string };
+}) {
   const router = useRouter();
 
   const CreateQuizRoute = () => {
-    router.push("/index/manageQuizzes");
+    router.push(`/${lang}/index/manageQuizzes`);
   };
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-44">

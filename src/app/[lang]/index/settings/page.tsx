@@ -6,7 +6,7 @@ import { SettingsProvider } from "@/hooks/context/ProjectSettingContext";
 export default async function SettingsPage() {
   const projectSettings = await getProjectSettings();
   const renderContent = () => {
-    return <Profile />;
+    return <Profile params={{ lang: "en" }} />;
   };
 
   return (
