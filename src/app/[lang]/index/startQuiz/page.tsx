@@ -1,10 +1,12 @@
 "use client";
 
 import { useQuizSession } from "@/hooks/context/QuizSessionContext";
-import FormatTime from "@/utils/FormatTime";
 import { useState, useEffect } from "react";
 import CryptoJS from "crypto-js";
-import { Spin } from "antd";
+import { Button, Spin } from "antd";
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
+import FormatTime from "@/utils/FormatTime";
 
 const StartQuizPage = () => {
   const { quizSession } = useQuizSession();
@@ -14,6 +16,7 @@ const StartQuizPage = () => {
   const [timer, setTimer] = useState<number>(0);
   const [timeExpired, setTimeExpired] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [initialTime, setInitialTime] = useState<number>(0);
 
   useEffect(() => {
     if (quizSession?.quiz) {
@@ -27,6 +30,7 @@ const StartQuizPage = () => {
       // Ensure the remaining time is positive, if not set it to 0
       if (remainingTime > 0) {
         setTimer(remainingTime);
+        setInitialTime(remainingTime);
       } else {
         setTimer(0);
         setTimeExpired(true);
@@ -73,9 +77,13 @@ const StartQuizPage = () => {
 
       const finalScore = result.data?.score ?? score;
       const quizId = quizSession?.quiz.id ?? "";
+      const totalQuestions = quizSession?.quiz.questions.length;
 
       const encryptedScore = CryptoJS.AES.encrypt(
-        finalScore.toString(),
+        JSON.stringify({
+          score: finalScore,
+          totalQuestions,
+        }),
         "secret_key"
       ).toString();
 
@@ -94,29 +102,53 @@ const StartQuizPage = () => {
       setLoading(false);
     }
   };
+  const progress = initialTime > 0 ? (timer / initialTime) * 100 : 0;
+  const getColor = () => {
+    if (progress > 60) return "#4CAF50";
+    if (progress > 30) return "#FFC107";
+    return "#F44336";
+  };
 
   return (
     <Spin spinning={loading} size="large">
       <div className="flex justify-center">
-        <div className="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6 text-center">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">
-            {quizSession?.quiz.title}
-          </h2>
-          <div className="flex justify-left mb-4">
-            <span className="text-gray-600">
-              Questions {currentQuestionIndex + 1} of{" "}
-              {quizSession?.quiz.questions.length}
-            </span>
-          </div>
-          <div className="text-red-500 font-bold mb-4">
-            Time Remaining: {FormatTime(timer)}
+        <div className="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6 text-center border">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-blue-800">
+              {quizSession?.quiz.title}
+            </h2>
+            <div className="flex items-center justify-between gap-4">
+              <div className="w-12 h-12">
+                <CircularProgressbar
+                  value={progress}
+                  text={FormatTime(timer)}
+                  styles={buildStyles({
+                    textSize: "24px",
+                    pathColor: getColor(),
+                    textColor: "#000",
+                    trailColor: "#E0E0E0",
+                    strokeLinecap: "round",
+                  })}
+                />
+              </div>
+              <div>
+                <span className="text-blue-800 font-bold text-xl">
+                  {currentQuestionIndex + 1} of{" "}
+                  {quizSession?.quiz.questions.length}
+                </span>
+              </div>
+              <div className="bg-blue-800 text-white px-4 py-2 rounded-md font-semibold">
+                Score {score}
+              </div>
+            </div>
           </div>
           {timeExpired && (
             <div className="text-red-600 font-semibold mb-4">
               Your time has expired!
             </div>
           )}
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
+          <div className="border-t-2 border-dotted border-gray-400 w-full mb-8"></div>
+          <h3 className="text-xl font-bold text-gray-500 mb-6">
             {quizSession?.quiz.questions[currentQuestionIndex]?.question}
           </h3>
           <div className="grid grid-cols-2 gap-4 mb-4">
@@ -124,10 +156,14 @@ const StartQuizPage = () => {
               (option: string) => (
                 <button
                   key={option}
-                  className={`py-3 px-4 border rounded-lg text-gray-700 text-sm font-medium transition-colors duration-200 ${
+                  className={`py-3 px-4 border rounded-lg text-sm font-medium bg-white border-black text-gray-500 transition-colors duration-200 ${
                     selectedAnswer === option
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 hover:bg-blue-200"
+                      ? option ===
+                        quizSession?.quiz.questions[currentQuestionIndex]
+                          ?.correctAnswer
+                        ? "text-green-500 border-green-500"
+                        : "text-red-500 border-red-500"
+                      : "bg-gray-100 hover:bg-blue-800 hover:text-white"
                   }`}
                   onClick={() => setSelectedAnswer(option)}
                   disabled={timeExpired}
@@ -137,12 +173,14 @@ const StartQuizPage = () => {
               )
             )}
           </div>
-          <button
-            className="bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
+          <Button
+            type="primary"
+            className="bg-blue-800 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
             onClick={handleNextQuestion}
+            disabled={!selectedAnswer}
           >
             Next
-          </button>
+          </Button>
         </div>
       </div>
     </Spin>

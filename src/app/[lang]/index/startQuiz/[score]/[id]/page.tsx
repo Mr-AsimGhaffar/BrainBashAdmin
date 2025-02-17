@@ -14,6 +14,7 @@ const EndQuizPage = () => {
   const quizId = params?.id ?? "";
 
   let finalScore = 0;
+  let totalQuestions = 0;
 
   if (encryptedScore) {
     try {
@@ -21,8 +22,11 @@ const EndQuizPage = () => {
         decodeURIComponent(encryptedScore),
         "secret_key"
       );
-      finalScore =
-        parseInt(decryptedBytes.toString(CryptoJS.enc.Utf8), 10) || 0;
+      const decryptedData = JSON.parse(
+        decryptedBytes.toString(CryptoJS.enc.Utf8)
+      );
+      finalScore = decryptedData.score || 0;
+      totalQuestions = decryptedData.totalQuestions || 0;
     } catch (error) {
       console.error("Error decrypting score:", error);
     }
@@ -40,7 +44,6 @@ const EndQuizPage = () => {
             `/api/leaderboard/getLeaderboard?id=${quizId}`
           );
           const data = await response.json();
-
           if (response.ok) {
             setLeaderboard(data.data);
           } else {
@@ -75,11 +78,16 @@ const EndQuizPage = () => {
 
         {activeTab === "Score" && (
           <div>
-            <h1 className="text-3xl font-extrabold text-blue-700 mb-4">
+            <h1 className="text-3xl font-extrabold text-blue-700 mb-6">
               CONGRATULATIONS
             </h1>
-            <p className="text-3xl font-bold text-gray-800 mb-4">
-              <span className="text-3xl">Final Score:</span> {finalScore}
+            <p className="text-5xl font-bold text-gray-600 mb-6">
+              {finalScore}/{totalQuestions}
+            </p>
+            <p className="text-3xl font-bold text-gray-800 mb-6">
+              <span className="bg-blue-800 text-white px-10 py-2 rounded-md font-semibold">
+                Score {finalScore}
+              </span>
             </p>
             <p>
               <button
