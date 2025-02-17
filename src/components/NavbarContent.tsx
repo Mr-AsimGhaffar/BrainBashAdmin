@@ -221,9 +221,6 @@ export default function NavbarContent({ locale, messages }: Props) {
                     </p>
                   </MenuItem>
 
-                  <MenuItem href={`/${locale}/index/settings`}>
-                    <FormattedMessage id="common.user-menu.your-profile" />
-                  </MenuItem>
                   <button
                     onClick={handleSignOut}
                     className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
