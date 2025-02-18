@@ -153,7 +153,7 @@ export default function NavbarContent({ locale, messages }: Props) {
             )}
             ref={appMenuRef}
           >
-            <div className="lg:flex lg:flex-row lg:mt-0 lg:border-0 lg:shadow-none lg:bg-transparent flex flex-col mt-2 border-t border-gray-200 shadow-lg bg-white font-semibold font-sansInter">
+            <div className="lg:flex lg:flex-row lg:mt-0 lg:border-0 lg:shadow-none lg:bg-transparent flex flex-col mt-2 border-t border-gray-200 shadow-lg bg-white font-semibold">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
 
@@ -161,7 +161,7 @@ export default function NavbarContent({ locale, messages }: Props) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 hover:rounded-md hover:text-white hover:font-semibold ${
+                    className={`px-3 py-2 text-sm text-gray-700 hover:bg-blue-500 hover:rounded-md hover:text-white hover:font-semibold ${
                       isActive
                         ? "bg-blue-500 font-semibold text-white rounded-md font-sansInter"
                         : ""
