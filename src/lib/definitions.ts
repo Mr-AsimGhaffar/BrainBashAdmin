@@ -114,10 +114,11 @@ export interface Achievement {
 }
 
 export interface Idea {
-  key: string;
+  key?: string;
   id: number;
   title: string;
   description: string;
+  updatedAt: string;
 }
 
 export interface AccessLogUser {

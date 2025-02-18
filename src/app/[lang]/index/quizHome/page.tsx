@@ -59,6 +59,7 @@ export default function QuizHome() {
                       ? `data:image/png;base64,${quiz.file.base64Content}`
                       : "/images/NoImage.png"
                   }
+                  lang={quiz.lang}
                 />
               </div>
             ))}

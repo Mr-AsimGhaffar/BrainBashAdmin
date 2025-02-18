@@ -12,8 +12,8 @@ export default function QuizListPage() {
     try {
       const response = await fetch("/api/quizzes/getQuizzes");
       if (!response.ok) throw new Error("Failed to fetch quizzes");
-      const { data } = await response.json();
-      setQuizzes(data);
+      const { quizzes } = await response.json();
+      setQuizzes(quizzes);
     } catch (error) {
       message.error("Failed to fetch quizzes");
     }
@@ -46,6 +46,7 @@ export default function QuizListPage() {
                 ? `data:image/png;base64,${quiz.file.base64Content}`
                 : "/images/NoImage.png"
             }
+            lang={quiz.lang}
           />
         ))}
       </div>

@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { fetchWithAuth } from "../refreshToken/refreshAccessToken";
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,14 +6,11 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     try {
-      const accessToken = req.cookies.accessToken || "";
-      const refreshToken = req.cookies.refreshToken || "";
       const { page = 1, limit = 10 } = req.query;
 
-      const response = await fetchWithAuth(
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/quizzes?page=${page}&limit=${limit}`,
-        { method: "GET" },
-        { accessToken, refreshToken }
+        { method: "GET" }
       );
 
       if (response.ok) {

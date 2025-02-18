@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from "@/hooks/context/AuthContext";
 import { Button, Card } from "antd";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +10,7 @@ export default function CreateQuizPage({
   params: { lang: string };
 }) {
   const router = useRouter();
+  const { user } = useUser();
 
   const CreateQuizRoute = () => {
     router.push(`/${lang}/index/manageQuizzes`);
@@ -31,13 +33,15 @@ export default function CreateQuizPage({
           <li>Quizzes help students learn and engage</li>
           <li>Quizzes help students learn and engage with subjects</li>
         </ul>
-        <Button
-          type="primary"
-          className="mt-4 bg-blue-700"
-          onClick={CreateQuizRoute}
-        >
-          Create Quizz
-        </Button>
+        {user && (
+          <Button
+            type="primary"
+            className="mt-4 bg-blue-700"
+            onClick={CreateQuizRoute}
+          >
+            Create Quizz
+          </Button>
+        )}
       </div>
       <Card className="border border-blue-500 rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold text-blue-700">How to Play Quizz</h2>

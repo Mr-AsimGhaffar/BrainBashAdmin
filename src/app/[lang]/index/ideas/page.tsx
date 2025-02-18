@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Table, Modal, message, Space, Popconfirm } from "antd";
+import { Button, Table, Modal, Space, message, Popconfirm } from "antd";
+import { message as antdMessage } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { FaEdit } from "react-icons/fa";
 import { Idea } from "@/lib/definitions";
 import dayjs from "dayjs";
 import IdeaForm from "@/components/ideas/IdeaForm";
+import mqtt from "mqtt";
 
 export default function IdeasPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,6 +48,31 @@ export default function IdeasPage() {
 
   useEffect(() => {
     fetchIdeas();
+    const client = mqtt.connect(`${process.env.NEXT_PUBLIC_IDEAS_BASE_URL}`);
+
+    client.on("connect", () => {
+      console.log("Connected to MQTT broker");
+      client.subscribe("notification/ideas");
+    });
+
+    client.on("message", (topic, message) => {
+      if (topic === "notification/ideas") {
+        try {
+          const newIdea: Idea = JSON.parse(message.toString());
+          setIdeas((prevIdeas) => [
+            { ...newIdea, key: newIdea.id.toString() },
+            ...prevIdeas,
+          ]);
+          antdMessage.success("New idea received!");
+        } catch (error) {
+          console.error("Error parsing MQTT message:", error);
+        }
+      }
+    });
+
+    return () => {
+      client.end();
+    };
   }, []);
 
   const columns: ColumnsType<Idea> = [
