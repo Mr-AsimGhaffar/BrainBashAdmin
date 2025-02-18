@@ -51,7 +51,6 @@ export default function IdeasPage() {
     const client = mqtt.connect(`${process.env.NEXT_PUBLIC_IDEAS_BASE_URL}`);
 
     client.on("connect", () => {
-      console.log("Connected to MQTT broker");
       client.subscribe("notification/ideas");
     });
 
