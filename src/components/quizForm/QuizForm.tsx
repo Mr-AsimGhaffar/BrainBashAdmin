@@ -313,58 +313,80 @@ const QuizForm = ({
 
                   <Form.Item shouldUpdate>
                     {() => {
-                      const isMultipleChoice =
-                        form.getFieldValue(["questions", name, "type"]) ===
-                        "MULTIPLE_CHOICE";
+                      const selectedType = form.getFieldValue([
+                        "questions",
+                        name,
+                        "type",
+                      ]);
                       return (
-                        <div
-                          style={{
-                            display: isMultipleChoice ? "block" : "none",
-                          }}
-                        >
-                          <Form.List name={[name, "options"]}>
-                            {(
-                              optionFields,
-                              { add: addOption, remove: removeOption }
-                            ) => (
-                              <>
-                                {optionFields.map((optionField, index) => (
-                                  <Form.Item
-                                    key={optionField.key}
-                                    label={`Option ${index + 1}`}
-                                    name={[optionField.name]}
-                                    rules={[
-                                      {
-                                        required: true,
-                                        message: "Please input the option!",
-                                      },
-                                    ]}
+                        <>
+                          {/* Handle Multiple Choice */}
+                          {selectedType === "MULTIPLE_CHOICE" && (
+                            <Form.List name={[name, "options"]}>
+                              {(
+                                optionFields,
+                                { add: addOption, remove: removeOption }
+                              ) => (
+                                <>
+                                  {optionFields.map((optionField, index) => (
+                                    <Form.Item
+                                      key={optionField.key}
+                                      label={`Option ${index + 1}`}
+                                      name={[optionField.name]}
+                                      rules={[
+                                        {
+                                          required: true,
+                                          message: "Please input the option!",
+                                        },
+                                      ]}
+                                    >
+                                      <Input
+                                        addonAfter={
+                                          <Button
+                                            danger
+                                            onClick={() =>
+                                              removeOption(optionField.name)
+                                            }
+                                          >
+                                            Remove
+                                          </Button>
+                                        }
+                                      />
+                                    </Form.Item>
+                                  ))}
+                                  <Button
+                                    type="dashed"
+                                    onClick={() => addOption()}
+                                    block
                                   >
-                                    <Input
-                                      addonAfter={
-                                        <Button
-                                          danger
-                                          onClick={() =>
-                                            removeOption(optionField.name)
-                                          }
-                                        >
-                                          Remove
-                                        </Button>
-                                      }
-                                    />
-                                  </Form.Item>
-                                ))}
-                                <Button
-                                  type="dashed"
-                                  onClick={() => addOption()}
-                                  block
-                                >
-                                  Add Option
-                                </Button>
-                              </>
-                            )}
-                          </Form.List>
-                        </div>
+                                    Add Option
+                                  </Button>
+                                </>
+                              )}
+                            </Form.List>
+                          )}
+
+                          {/* Handle True/False */}
+                          {selectedType === "TRUE_FALSE" && (
+                            <Form.Item
+                              label="Correct Answer"
+                              name={[name, "answer"]}
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Please select the correct answer!",
+                                },
+                              ]}
+                            >
+                              <Select
+                                options={[
+                                  { value: "True", label: "True" },
+                                  { value: "False", label: "False" },
+                                ]}
+                              />
+                            </Form.Item>
+                          )}
+                        </>
                       );
                     }}
                   </Form.Item>

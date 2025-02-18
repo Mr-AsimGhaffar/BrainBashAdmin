@@ -1,19 +1,19 @@
 "use client";
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { Locale } from "@/lib/definitions";
 
 interface QuizCardProps {
   id: string;
   title: string;
   image: string;
-  lang: string;
 }
 
-export default function QuizCard({ id, title, image, lang }: QuizCardProps) {
+export default function QuizCard({ id, title, image }: QuizCardProps) {
   const router = useRouter();
 
   const handleQuizClick = () => {
-    router.push(`${lang}/index/quizzesList/${id}`);
+    router.push(`/en/index/quizzesList/${id}`);
   };
 
   return (
