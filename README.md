@@ -68,9 +68,9 @@ The platform ensures a **seamless, real-time experience** using **MQTT** and a *
 
 ---
 
-## 📷 Screenshots / Demo  
+## 📷 Demo  
 
-📌 **[Add Screenshots, GIFs, or a Video Demo of BrainBash]**  
+📌 https://www.loom.com/share/20bad48a8dfa4ed39c2242d0760a43a2?sid=ae142b25-fa0f-4031-9e42-d2d8b07c8f45
 
 ---
 
